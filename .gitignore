@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+.output/
+.nuxt/
+dist/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+firebase-debug.log
+
+# MCP
+.mcp.json
+
+# Logs
+*.log
+
+# Test coverage
+coverage/
+
+# Playwright
+playwright-report/
+test-results/
