@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/user-authentication/design.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-04-09T14:32:50.519Z",
+      "trigger": "initial",
+      "approvalId": "approval_1775745170517_gpm495ql1",
+      "approvalTitle": "ユーザー認証機能 - 設計書"
+    }
+  ]
+}
