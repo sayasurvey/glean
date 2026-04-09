@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/user-authentication/requirements.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-04-09T14:22:12.060Z",
+      "trigger": "initial",
+      "approvalId": "approval_1775744532057_s4acgjtql",
+      "approvalTitle": "ユーザー認証機能 - 要件定義書"
+    }
+  ]
+}
