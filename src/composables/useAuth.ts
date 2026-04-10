@@ -16,15 +16,16 @@ import type { AuthErrorMap, UserProfile } from '~/types/auth'
 import { useFirebaseAuth } from '~/plugins/firebase.client'
 
 const AUTH_ERROR_MAP: AuthErrorMap = {
-  'auth/network-request-failed': 'ネットワーク接続を確認してください',
+  'auth/network-request-failed': 'ネットワーク接続を確認するか、しばらく時間をおいてから再試行してください',
   'auth/invalid-email': '有効なメールアドレスを入力してください',
   'auth/weak-password': 'パスワードは8文字以上で入力してください',
-  'auth/email-already-in-use': 'このメールアドレスは既に登録されています',
+  'auth/email-already-in-use': 'このメールアドレスは使用できません。既にアカウントをお持ちの場合はログインをお試しください',
   'auth/wrong-password': 'メールアドレスまたはパスワードが正しくありません',
   'auth/user-not-found': 'メールアドレスまたはパスワードが正しくありません',
   'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません',
   'auth/popup-closed-by-user': '',
   'auth/too-many-requests': 'しばらく時間をおいてから再試行してください',
+  'auth/operation-not-allowed': 'この認証方法は現在利用できません。管理者にお問い合わせください',
 }
 
 const getErrorMessage = (code: string): string => {
