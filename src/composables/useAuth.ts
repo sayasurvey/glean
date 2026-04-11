@@ -14,6 +14,7 @@ import { getApps } from 'firebase/app'
 import type { User } from 'firebase/auth'
 import type { AuthErrorMap, UserProfile } from '~/types/auth'
 import { useFirebaseAuth } from '~/plugins/firebase.client'
+import { ref, computed, readonly } from 'vue'
 
 const AUTH_ERROR_MAP: AuthErrorMap = {
   'auth/network-request-failed': 'ネットワーク接続を確認するか、しばらく時間をおいてから再試行してください',

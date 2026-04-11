@@ -91,7 +91,7 @@ describe('useAuth', () => {
 
       await loginWithGoogle()
 
-      expect(error.value).toBe('ネットワーク接続を確認してください')
+      expect(error.value).toBe('ネットワーク接続を確認するか、しばらく時間をおいてから再試行してください')
     })
   })
 
@@ -151,7 +151,7 @@ describe('useAuth', () => {
       const { signupWithEmail, error } = useAuth()
 
       await expect(signupWithEmail('dup@example.com', 'password123')).rejects.toBeTruthy()
-      expect(error.value).toBe('このメールアドレスは既に登録されています')
+      expect(error.value).toBe('このメールアドレスは使用できません。既にアカウントをお持ちの場合はログインをお試しください')
     })
 
     it('弱いパスワード時は日本語エラーを表示', async () => {
@@ -197,8 +197,8 @@ describe('useAuth', () => {
     const cases = [
       { code: 'auth/invalid-email', expected: '有効なメールアドレスを入力してください' },
       { code: 'auth/user-not-found', expected: 'メールアドレスまたはパスワードが正しくありません' },
-      { code: 'auth/email-already-in-use', expected: 'このメールアドレスは既に登録されています' },
-      { code: 'auth/network-request-failed', expected: 'ネットワーク接続を確認してください' },
+      { code: 'auth/email-already-in-use', expected: 'このメールアドレスは使用できません。既にアカウントをお持ちの場合はログインをお試しください' },
+      { code: 'auth/network-request-failed', expected: 'ネットワーク接続を確認するか、しばらく時間をおいてから再試行してください' },
     ]
 
     cases.forEach(({ code, expected }) => {
