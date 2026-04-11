@@ -3,6 +3,9 @@ import { ref, computed } from 'vue'
 
 const mockNavigateTo = vi.fn()
 
+vi.stubGlobal('defineNuxtRouteMiddleware', vi.fn((fn: unknown) => fn))
+vi.stubGlobal('navigateTo', mockNavigateTo)
+
 vi.mock('#app', () => ({
   defineNuxtRouteMiddleware: vi.fn((fn: unknown) => fn),
   navigateTo: mockNavigateTo,
