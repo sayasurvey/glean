@@ -1,17 +1,10 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
 
-const emit = defineEmits<{
-  success: []
-}>()
-
 const { loginWithGoogle, error, isLoading } = useAuth()
 
 const handleClick = async () => {
   await loginWithGoogle()
-  if (!error.value) {
-    emit('success')
-  }
 }
 </script>
 
