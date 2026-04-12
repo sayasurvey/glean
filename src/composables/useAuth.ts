@@ -1,5 +1,6 @@
 import {
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -10,7 +11,6 @@ import {
 } from 'firebase/auth'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { getFirestore } from 'firebase/firestore'
-import { getApps } from 'firebase/app'
 import type { User } from 'firebase/auth'
 import type { AuthErrorMap, UserProfile } from '~/types/auth'
 import { useFirebaseAuth } from '~/plugins/firebase.client'
@@ -25,8 +25,15 @@ const AUTH_ERROR_MAP: AuthErrorMap = {
   'auth/user-not-found': 'メールアドレスまたはパスワードが正しくありません',
   'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません',
   'auth/popup-closed-by-user': '',
+  'auth/cancelled-popup-request': '',
   'auth/too-many-requests': 'しばらく時間をおいてから再試行してください',
   'auth/operation-not-allowed': 'この認証方法は現在利用できません。管理者にお問い合わせください',
+  'auth/unauthorized-domain': 'このドメインからの認証は許可されていません。Firebase Consoleで承認済みドメインを確認してください',
+  'auth/popup-blocked': 'ポップアップがブロックされました。ブラウザのポップアップを許可してから再試行してください',
+  'auth/internal-error': '認証サービスで内部エラーが発生しました。しばらく時間をおいてから再試行してください',
+  'auth/cors-unsupported': 'ブラウザがCORSに対応していません',
+  'auth/web-storage-unsupported': 'ブラウザのWebストレージが無効になっています。設定を確認してください',
+  'auth/account-exists-with-different-credential': '別の認証方法で登録済みのメールアドレスです',
 }
 
 const getErrorMessage = (code: string): string => {
@@ -70,22 +77,34 @@ export const useAuth = () => {
       currentUser.value = user
       isLoading.value = false
     })
+
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const isNew = result.user.metadata.creationTime === result.user.metadata.lastSignInTime
+          if (isNew) {
+            await createUserProfile(result.user, 'google')
+          }
+        }
+      })
+      .catch((e: unknown) => {
+        const code = (e as { code?: string }).code ?? ''
+        console.error('[Auth] Googleリダイレクト結果エラー:', code, e)
+        if (code) {
+          error.value = getErrorMessage(code)
+        }
+      })
   }
 
   const loginWithGoogle = async (): Promise<void> => {
     error.value = null
     try {
       const provider = new GoogleAuthProvider()
-      const result = await signInWithPopup(auth, provider)
-      const isNew = result.user.metadata.creationTime === result.user.metadata.lastSignInTime
-      if (isNew) {
-        await createUserProfile(result.user, 'google')
-      }
+      await signInWithRedirect(auth, provider)
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? ''
-      if (code !== 'auth/popup-closed-by-user') {
-        error.value = getErrorMessage(code)
-      }
+      console.error('[Auth] Googleログインエラー:', code, e)
+      error.value = getErrorMessage(code)
     }
   }
 
