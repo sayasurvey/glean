@@ -37,3 +37,10 @@ coverage/
 # Playwright
 playwright-report/
 test-results/
+
+# AWS SAM
+infra/.aws-sam/
+infra/.env.local
+infra/lambdas/*/dist/
+infra/lambdas/*/node_modules/
+infra/build/

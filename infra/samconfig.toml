@@ -1,0 +1,25 @@
+version = 0.1
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "glean"
+s3_bucket = "glean-sam-artifacts-827251793719"
+s3_prefix = "glean"
+region = "ap-northeast-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = [
+  "DomainName=myglean.jp",
+  "AcmCertificateArn=arn:aws:acm:us-east-1:827251793719:certificate/18609158-f0e6-44b6-bc59-edc0792580da",
+  "AllowedOrigin=https://myglean.jp"
+]
+
+[default.build]
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.sync]
+[default.sync.parameters]
+watch = true

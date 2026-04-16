@@ -37,10 +37,12 @@ const handleConfirm = async () => {
 
   step.value = 'loading'
 
+  const config = useRuntimeConfig()
+  const apiBase = config.public.apiBase as string
   const authHeaders = await getAuthHeaders()
 
   try {
-    ogpData.value = await $fetch<OgpData>('/api/ogp', {
+    ogpData.value = await $fetch<OgpData>(`${apiBase}/api/ogp`, {
       params: { url: url.value },
       headers: authHeaders,
     })
@@ -53,7 +55,7 @@ const handleConfirm = async () => {
   }
 
   try {
-    const geminiData = await $fetch<GeminiSummaryData>('/api/gemini', {
+    const geminiData = await $fetch<GeminiSummaryData>(`${apiBase}/api/gemini`, {
       method: 'POST',
       body: {
         url: url.value,
