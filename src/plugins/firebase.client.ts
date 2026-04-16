@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { getAuth, connectAuthEmulator } from 'firebase/auth'
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 
 let authInstance: ReturnType<typeof getAuth> | null = null
 let dbInstance: ReturnType<typeof getFirestore> | null = null
@@ -22,7 +22,27 @@ export const useFirebaseDb = () => {
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
 
+  // Firebase設定値の確認
+  const requiredKeys = [
+    'firebaseApiKey',
+    'firebaseAuthDomain',
+    'firebaseProjectId',
+    'firebaseStorageBucket',
+    'firebaseMessagingSenderId',
+    'firebaseAppId',
+  ]
+
+  const missingKeys = requiredKeys.filter(
+    key => !config.public[key as keyof typeof config.public]
+  )
+
+  if (missingKeys.length > 0) {
+    console.error('[Firebase] 設定が不足しています:', missingKeys)
+    throw new Error(`Firebase設定が不完全です: ${missingKeys.join(', ')}`)
+  }
+
   if (getApps().length === 0) {
+    console.log('[Firebase] アプリケーションを初期化中...')
     const app = initializeApp({
       apiKey: config.public.firebaseApiKey,
       authDomain: config.public.firebaseAuthDomain,
@@ -31,10 +51,26 @@ export default defineNuxtPlugin(() => {
       messagingSenderId: config.public.firebaseMessagingSenderId,
       appId: config.public.firebaseAppId,
     })
+    console.log('[Firebase] アプリケーション初期化完了')
+
     authInstance = getAuth(app)
     dbInstance = getFirestore(app)
+
+    // 開発環境でのエミュレータ設定（オプション）
+    if (process.env.NODE_ENV === 'development' && process.env.NUXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+      console.log('[Firebase] エミュレータを使用します')
+      try {
+        connectAuthEmulator(authInstance, 'http://localhost:9099', { disableWarnings: true })
+        connectFirestoreEmulator(dbInstance, 'localhost', 8080)
+      } catch (e) {
+        console.log('[Firebase] エミュレータ接続スキップ（既に接続済みまたは利用不可）')
+      }
+    }
   } else {
+    console.log('[Firebase] 既存のアプリケーションを使用')
     authInstance = getAuth()
     dbInstance = getFirestore()
   }
+
+  console.log('[Firebase] 初期化完了: authDomain=', config.public.firebaseAuthDomain)
 })
