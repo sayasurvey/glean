@@ -1,11 +1,29 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
+import { ref, watch } from 'vue'
 
-const { loginWithGoogle, error, isLoading } = useAuth()
+const emit = defineEmits<{
+  success: []
+}>()
+
+const { loginWithGoogle, error, isLoading, isAuthenticated } = useAuth()
 
 const handleClick = async () => {
-  await loginWithGoogle()
+  try {
+    await loginWithGoogle()
+    // Google認証でリダイレクトされるので、このコードは実行されない
+    // ただし、エラー時はここに戻ってくる
+  } catch (e) {
+    console.error('[GoogleButton] ログインエラー:', e)
+  }
 }
+
+// ページがリロードされた後、認証状態が変わったら success を発火
+watch(isAuthenticated, (authenticated) => {
+  if (authenticated) {
+    emit('success')
+  }
+})
 </script>
 
 <template>
