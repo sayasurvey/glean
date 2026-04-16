@@ -83,12 +83,14 @@ export const usePosts = () => {
     let summary = prefetched?.summary ?? ''
 
     if (!prefetched) {
+      const config = useRuntimeConfig()
+      const apiBase = config.public.apiBase as string
       const { currentUser } = useAuth()
       const token = await currentUser.value?.getIdToken()
       const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
       try {
-        ogpData = await $fetch<OgpData>('/api/ogp', {
+        ogpData = await $fetch<OgpData>(`${apiBase}/api/ogp`, {
           params: { url },
           headers: authHeaders,
         })
@@ -97,7 +99,7 @@ export const usePosts = () => {
       }
 
       try {
-        const geminiData = await $fetch<GeminiSummaryData>('/api/gemini', {
+        const geminiData = await $fetch<GeminiSummaryData>(`${apiBase}/api/gemini`, {
           method: 'POST',
           body: {
             url,
