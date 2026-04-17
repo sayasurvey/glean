@@ -4,23 +4,18 @@ import { useAuth } from '~/composables/useAuth'
 const { isAuthenticated, isLoading, error } = useAuth()
 
 onMounted(async () => {
-  console.log('[LoginPage] マウント時: isLoading=', isLoading.value, 'isAuthenticated=', isAuthenticated.value)
   if (!isLoading.value && isAuthenticated.value) {
-    console.log('[LoginPage] ログイン状態で自動リダイレクト')
     await navigateTo('/')
   }
 })
 
 watch([isLoading, isAuthenticated], async ([loading, authenticated]) => {
-  console.log('[LoginPage] watch: isLoading=', loading, 'isAuthenticated=', authenticated)
   if (!loading && authenticated) {
-    console.log('[LoginPage] 認証完了、ホームへリダイレクト')
     await navigateTo('/')
   }
 })
 
 const handleSuccess = async () => {
-  console.log('[LoginPage] handleSuccess実行')
   await navigateTo('/')
 }
 </script>

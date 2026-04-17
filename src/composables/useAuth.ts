@@ -72,45 +72,32 @@ const initializeAuth = (auth: ReturnType<typeof useFirebaseAuth>) => {
   if (isInitialized) return
   isInitialized = true
 
-  console.log('[Auth] 認証の初期化を開始...')
-
   // 認証状態の変更を監視
   unsubscribe = onAuthStateChanged(auth, (user) => {
-    console.log('[Auth] onAuthStateChanged発火:', user?.email ?? 'null')
     currentUser.value = user
     isLoading.value = false
   })
 
   // リダイレクト結果を処理（Google認証など）
-  // これは getRedirectResult が何かを返す場合のみ処理される
   getRedirectResult(auth)
     .then(async (result) => {
       if (result?.user) {
-        console.log('[Auth] リダイレクト認証成功:', result.user.email)
         const isNew = result.user.metadata.creationTime === result.user.metadata.lastSignInTime
-        console.log('[Auth] 新規ユーザー:', isNew)
         if (isNew) {
           try {
             await createUserProfile(result.user, 'google')
-            console.log('[Auth] ユーザープロフィール作成完了')
           } catch (e) {
-            console.error('[Auth] ユーザープロフィール作成エラー:', e)
             // プロフィール作成エラーは認証の妨げにはしない
           }
         }
-      } else {
-        console.log('[Auth] リダイレクト結果: result?.user がnull（リダイレクト認証は行われなかった）')
       }
     })
     .catch((e: unknown) => {
       const code = (e as { code?: string }).code ?? ''
-      const message = (e as { message?: string }).message ?? ''
-      console.error('[Auth] Googleリダイレクト結果エラー:', { code, message, error: e })
 
       // ユーザーがキャンセルした場合やリダイレクトがない場合はエラーを表示しない
       if (code && code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
         if (!error.value) {
-          // 既にエラーが設定されていない場合だけ設定
           error.value = getErrorMessage(code)
         }
       }
@@ -130,16 +117,11 @@ export const useAuth = () => {
   const loginWithGoogle = async (): Promise<void> => {
     error.value = null
     try {
-      console.log('[Auth] Google認証開始（リダイレクト方式）...')
       const provider = new GoogleAuthProvider()
       // カスタムドメインでのクロスオリジン問題を避けるためリダイレクト方式を使用
-      // signInWithPopup はカスタムドメイン + firebaseapp.com の authDomain の組み合わせで
-      // Chrome 115+ のサードパーティCookie制限により失敗することがある
       await signInWithRedirect(auth, provider)
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? ''
-      const message = (e as { message?: string }).message ?? ''
-      console.error('[Auth] Googleログインエラー:', { code, message, error: e })
 
       if (code === 'auth/unauthorized-domain') {
         error.value = 'このドメインからの認証は許可されていません。Firebase ConsoleでJavaScriptリダイレクトURIを確認してください。'
