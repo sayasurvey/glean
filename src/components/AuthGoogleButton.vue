@@ -11,10 +11,8 @@ const { loginWithGoogle, error, isLoading, isAuthenticated } = useAuth()
 const handleClick = async () => {
   try {
     await loginWithGoogle()
-    // Google認証でリダイレクトされるので、このコードは実行されない
-    // ただし、エラー時はここに戻ってくる
-  } catch (e) {
-    console.error('[GoogleButton] ログインエラー:', e)
+  } catch {
+    // エラーは useAuth 内で error に設定される
   }
 }
 
