@@ -1,5 +1,6 @@
 import {
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -10,10 +11,10 @@ import {
 } from 'firebase/auth'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { getFirestore } from 'firebase/firestore'
-import { getApps } from 'firebase/app'
 import type { User } from 'firebase/auth'
 import type { AuthErrorMap, UserProfile } from '~/types/auth'
 import { useFirebaseAuth } from '~/plugins/firebase.client'
+import { ref, computed, readonly } from 'vue'
 
 const AUTH_ERROR_MAP: AuthErrorMap = {
   'auth/network-request-failed': 'ネットワーク接続を確認するか、しばらく時間をおいてから再試行してください',
@@ -24,8 +25,15 @@ const AUTH_ERROR_MAP: AuthErrorMap = {
   'auth/user-not-found': 'メールアドレスまたはパスワードが正しくありません',
   'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません',
   'auth/popup-closed-by-user': '',
+  'auth/cancelled-popup-request': '',
   'auth/too-many-requests': 'しばらく時間をおいてから再試行してください',
   'auth/operation-not-allowed': 'この認証方法は現在利用できません。管理者にお問い合わせください',
+  'auth/unauthorized-domain': 'このドメインからの認証は許可されていません。Firebase Consoleで承認済みドメインを確認してください',
+  'auth/popup-blocked': 'ポップアップがブロックされました。ブラウザのポップアップを許可してから再試行してください',
+  'auth/internal-error': '認証サービスで内部エラーが発生しました。しばらく時間をおいてから再試行してください',
+  'auth/cors-unsupported': 'ブラウザがCORSに対応していません',
+  'auth/web-storage-unsupported': 'ブラウザのWebストレージが無効になっています。設定を確認してください',
+  'auth/account-exists-with-different-credential': '別の認証方法で登録済みのメールアドレスです',
 }
 
 const getErrorMessage = (code: string): string => {
@@ -36,6 +44,7 @@ const currentUser = ref<User | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 let unsubscribe: (() => void) | null = null
+let isInitialized = false
 
 const createUserProfile = async (user: User, provider: 'google' | 'email') => {
   const db = getFirestore()
@@ -59,31 +68,71 @@ const createUserProfile = async (user: User, provider: 'google' | 'email') => {
   }
 }
 
+const initializeAuth = (auth: ReturnType<typeof useFirebaseAuth>) => {
+  if (isInitialized) return
+  isInitialized = true
+
+  // 認証状態の変更を監視
+  unsubscribe = onAuthStateChanged(auth, (user) => {
+    currentUser.value = user
+    isLoading.value = false
+  })
+
+  // リダイレクト結果を処理（Google認証など）
+  getRedirectResult(auth)
+    .then(async (result) => {
+      if (result?.user) {
+        const isNew = result.user.metadata.creationTime === result.user.metadata.lastSignInTime
+        if (isNew) {
+          try {
+            await createUserProfile(result.user, 'google')
+          } catch (e) {
+            // プロフィール作成エラーは認証の妨げにはしない
+          }
+        }
+      }
+    })
+    .catch((e: unknown) => {
+      const code = (e as { code?: string }).code ?? ''
+
+      // ユーザーがキャンセルした場合やリダイレクトがない場合はエラーを表示しない
+      if (code && code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
+        if (!error.value) {
+          error.value = getErrorMessage(code)
+        }
+      }
+    })
+}
+
 export const useAuth = () => {
   const auth = useFirebaseAuth()
 
   const isAuthenticated = computed(() => currentUser.value !== null)
 
-  if (!unsubscribe) {
-    unsubscribe = onAuthStateChanged(auth, (user) => {
-      currentUser.value = user
-      isLoading.value = false
-    })
+  // 初期化はグローバルで一度だけ実行
+  if (!isInitialized) {
+    initializeAuth(auth)
   }
 
   const loginWithGoogle = async (): Promise<void> => {
     error.value = null
     try {
       const provider = new GoogleAuthProvider()
-      const result = await signInWithPopup(auth, provider)
-      const isNew = result.user.metadata.creationTime === result.user.metadata.lastSignInTime
-      if (isNew) {
-        await createUserProfile(result.user, 'google')
-      }
+      // カスタムドメインでのクロスオリジン問題を避けるためリダイレクト方式を使用
+      await signInWithRedirect(auth, provider)
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? ''
-      if (code !== 'auth/popup-closed-by-user') {
+
+      if (code === 'auth/unauthorized-domain') {
+        error.value = 'このドメインからの認証は許可されていません。Firebase ConsoleでJavaScriptリダイレクトURIを確認してください。'
+      } else if (code === 'auth/invalid-api-key') {
+        error.value = 'FirebaseのAPI設定に問題があります。管理者にお問い合わせください。'
+      } else if (code === 'auth/operation-not-allowed') {
+        error.value = 'Google認証は現在利用できません。管理者にお問い合わせください。'
+      } else if (code) {
         error.value = getErrorMessage(code)
+      } else {
+        error.value = 'Google認証に失敗しました。ブラウザのコンソールを確認してください。'
       }
     }
   }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
 
-const { isAuthenticated, isLoading } = useAuth()
+const { isAuthenticated, isLoading, error } = useAuth()
 
 onMounted(async () => {
   if (!isLoading.value && isAuthenticated.value) {
@@ -27,6 +27,15 @@ const handleSuccess = async () => {
         <h1 class="text-2xl font-bold text-gray-900">ログイン</h1>
       </div>
 
+      <div v-if="isLoading" class="flex items-center justify-center space-x-2 py-4">
+        <div class="h-2 w-2 animate-bounce rounded-full bg-blue-500" />
+        <div class="h-2 w-2 animate-bounce rounded-full bg-blue-500" style="animation-delay: 0.1s" />
+        <div class="h-2 w-2 animate-bounce rounded-full bg-blue-500" style="animation-delay: 0.2s" />
+        <span class="ml-2 text-sm text-gray-600">認証を処理中...</span>
+      </div>
+
+      <p v-if="error" class="rounded bg-red-50 p-3 text-sm text-red-700">{{ error }}</p>
+
       <AuthGoogleButton @success="handleSuccess" />
 
       <div class="relative">
@@ -40,5 +49,7 @@ const handleSuccess = async () => {
 
       <AuthLoginForm @success="handleSuccess" />
     </div>
+
+    <AuthDebug />
   </div>
 </template>

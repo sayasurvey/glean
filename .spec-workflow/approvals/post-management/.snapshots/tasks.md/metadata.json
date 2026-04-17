@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/post-management/tasks.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-04-10T10:42:55.090Z",
+      "trigger": "initial",
+      "approvalId": "approval_1775817775086_7qzu1jy17",
+      "approvalTitle": "投稿一覧・登録機能 - タスク一覧"
+    }
+  ]
+}
