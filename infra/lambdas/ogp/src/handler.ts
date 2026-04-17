@@ -3,6 +3,7 @@
  * server/api/ogp.ts から移植
  */
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import { promises as dns } from 'dns'
 import { requireAuth, corsHeaders } from './firebase-auth'
 import type { OgpData } from './types'
 
@@ -20,9 +21,35 @@ const BLOCKED_RANGES = [
 ]
 
 /**
+ * IPアドレスがプライベートレンジに属するか検証（DNSリバインディング対策）
+ */
+const isBlockedIp = (ip: string): boolean => {
+  return BLOCKED_HOSTNAMES.includes(ip) || BLOCKED_RANGES.some((re) => re.test(ip))
+}
+
+/**
+ * ホスト名をDNS解決してプライベートIPへの解決をブロック（DNSリバインディング対策）
+ */
+const validateResolvedIp = async (hostname: string): Promise<void> => {
+  const [v4, v6] = await Promise.all([
+    dns.resolve4(hostname).catch(() => [] as string[]),
+    dns.resolve6(hostname).catch(() => [] as string[]),
+  ])
+  const allIps = [...v4, ...v6]
+  if (allIps.length === 0) {
+    throw new Error('無効なURLです')
+  }
+  for (const ip of allIps) {
+    if (isBlockedIp(ip)) {
+      throw new Error('無効なURLです')
+    }
+  }
+}
+
+/**
  * URLのバリデーション（SSRF対策）
  */
-const validateUrl = (urlString: string): void => {
+const validateUrl = (urlString: string): URL => {
   let url: URL
   try {
     url = new URL(urlString)
@@ -35,9 +62,11 @@ const validateUrl = (urlString: string): void => {
   }
 
   const hostname = url.hostname.toLowerCase()
-  if (BLOCKED_HOSTNAMES.includes(hostname) || BLOCKED_RANGES.some((re) => re.test(hostname))) {
+  if (isBlockedIp(hostname)) {
     throw new Error('無効なURLです')
   }
+
+  return url
 }
 
 /**
@@ -93,7 +122,9 @@ const fetchHtmlWithCookies = async (urlString: string, maxRedirects = 10): Promi
       const location = response.headers.get('location')
       if (!location) break
       currentUrl = new URL(location, currentUrl).href
-      validateUrl(currentUrl)
+      // リダイレクト先も構文検証＋DNS解決検証を行う
+      const redirectUrl = validateUrl(currentUrl)
+      await validateResolvedIp(redirectUrl.hostname.toLowerCase())
     } else {
       throw new Error(`HTTP ${response.status}`)
     }
@@ -182,9 +213,10 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     }
   }
 
-  // URLバリデーション
+  // URLバリデーション（構文チェック + DNSリバインディング対策）
   try {
-    validateUrl(url)
+    const parsedUrl = validateUrl(url)
+    await validateResolvedIp(parsedUrl.hostname.toLowerCase())
   } catch {
     return {
       statusCode: 400,
