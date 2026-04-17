@@ -19,135 +19,9 @@ Parameters:
   AllowedOrigin:
     Type: String
     Description: Origin header value for CORS
-    Default: "https://myglean.jp"
-
-  DomainName:
-    Type: String
-    Description: Custom domain name for CloudFront
-    Default: "myglean.jp"
-
-  AcmCertificateArn:
-    Type: String
-    Description: ACM certificate ARN (must be in us-east-1)
-    Default: ""
-
-Conditions:
-  HasCertificate: !Not [!Equals [!Ref AcmCertificateArn, ""]]
+    Default: "https://www.myglean.jp"
 
 Resources:
-  FrontendBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub glean-frontend-${AWS::AccountId}
-      VersioningConfiguration:
-        Status: Enabled
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-
-  CloudFrontOAC:
-    Type: AWS::CloudFront::OriginAccessControl
-    Properties:
-      OriginAccessControlConfig:
-        Name: glean-oac
-        OriginAccessControlOriginType: s3
-        SigningBehavior: always
-        SigningProtocol: sigv4
-
-  FrontendBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    DependsOn: CloudFrontDistribution
-    Properties:
-      Bucket: !Ref FrontendBucket
-      PolicyText:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: AllowCloudFrontOAC
-            Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub ${FrontendBucket.Arn}/*
-
-  CloudFrontDistribution:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Enabled: true
-        Comment: glean
-        DefaultRootObject: index.html
-        HttpVersion: http2and3
-        PriceClass: PriceClass_100
-        Origins:
-          - Id: S3Origin
-            DomainName: !GetAtt FrontendBucket.RegionalDomainName
-            OriginAccessControlId: !Ref CloudFrontOAC
-          - Id: ApiGatewayOrigin
-            DomainName: !Sub ${GleanApi}.execute-api.${AWS::Region}.amazonaws.com
-            CustomOriginConfig:
-              HTTPPort: 80
-              HTTPSPort: 443
-              OriginProtocolPolicy: https-only
-              OriginSSLProtocols:
-                - TLSv1.2
-        DefaultCacheBehavior:
-          TargetOriginId: S3Origin
-          ViewerProtocolPolicy: redirect-to-https
-          ForwardedValues:
-            QueryString: false
-            Cookies:
-              Forward: none
-          MinTTL: 0
-          DefaultTTL: 86400
-          MaxTTL: 31536000
-          Compress: true
-        CacheBehaviors:
-          - PathPattern: /index.html
-            TargetOriginId: S3Origin
-            ViewerProtocolPolicy: redirect-to-https
-            ForwardedValues:
-              QueryString: false
-              Cookies:
-                Forward: none
-            MinTTL: 0
-            DefaultTTL: 60
-            MaxTTL: 300
-            Compress: true
-          - PathPattern: /api/*
-            TargetOriginId: ApiGatewayOrigin
-            ViewerProtocolPolicy: https-only
-            AllowedMethods:
-              - GET
-              - HEAD
-              - OPTIONS
-              - PUT
-              - POST
-              - PATCH
-              - DELETE
-            CachedMethods:
-              - GET
-              - HEAD
-            ForwardedValues:
-              QueryString: true
-              Headers:
-                - Authorization
-                - Content-Type
-              Cookies:
-                Forward: all
-            MinTTL: 0
-            DefaultTTL: 0
-            MaxTTL: 0
-            Compress: true
-        ViewerCertificate:
-          AcmCertificateArn: !Ref AcmCertificateArn
-          MinimumProtocolVersion: TLSv1.2_2021
-          SslSupportMethod: sni-only
-        AlternateDomainNames:
-          - !Ref DomainName
-          - !Sub www.${DomainName}
-
   SharedDepsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -164,8 +38,11 @@ Resources:
     Properties:
       FunctionName: glean-ogp
       CodeUri: lambdas/ogp/
-      Handler: dist/handler.handler
+      Handler: handler.handler
       Description: OGP data fetcher with Firebase auth
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: glean/*
       Environment:
         Variables:
           ALLOWED_ORIGIN: !Ref AllowedOrigin
@@ -177,16 +54,29 @@ Resources:
             Path: /api/ogp
             Method: GET
     Metadata:
-      BuildMethod: nodejs22.x
-      BuildArchitecture: arm64
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handler.ts
+        External:
+          - firebase-admin
+          - firebase-admin/app
+          - firebase-admin/auth
+          - "@aws-sdk/client-ssm"
 
   GeminiFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: glean-gemini
       CodeUri: lambdas/gemini/
-      Handler: dist/handler.handler
+      Handler: handler.handler
       Description: Gemini summary generator with Firebase auth
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: glean/*
       Environment:
         Variables:
           ALLOWED_ORIGIN: !Ref AllowedOrigin
@@ -198,8 +88,18 @@ Resources:
             Path: /api/gemini
             Method: POST
     Metadata:
-      BuildMethod: nodejs22.x
-      BuildArchitecture: arm64
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handler.ts
+        External:
+          - firebase-admin
+          - firebase-admin/app
+          - firebase-admin/auth
+          - "@aws-sdk/client-ssm"
 
   GleanApi:
     Type: AWS::Serverless::Api
@@ -224,21 +124,3 @@ Outputs:
     Description: API Gateway ID
     Export:
       Name: !Sub ${AWS::StackName}-GleanApiId
-
-  FrontendBucketName:
-    Value: !Ref FrontendBucket
-    Description: Frontend S3 Bucket Name
-    Export:
-      Name: !Sub ${AWS::StackName}-FrontendBucketName
-
-  CloudFrontDistributionId:
-    Value: !Ref CloudFrontDistribution
-    Description: CloudFront Distribution ID
-    Export:
-      Name: !Sub ${AWS::StackName}-CloudFrontDistributionId
-
-  CloudFrontDomainName:
-    Value: !GetAtt CloudFrontDistribution.DomainName
-    Description: CloudFront Distribution Domain Name
-    Export:
-      Name: !Sub ${AWS::StackName}-CloudFrontDomainName

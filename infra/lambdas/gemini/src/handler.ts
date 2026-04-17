@@ -5,8 +5,8 @@
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { requireAuth, corsHeaders } from '../../shared/src/firebase-auth'
-import type { GeminiSummaryData } from '../../shared/src/types'
+import { requireAuth, corsHeaders } from './firebase-auth'
+import type { GeminiSummaryData } from './types'
 
 /**
  * AWS SSM Parameter Store からパラメータを取得

@@ -3,8 +3,8 @@
  * server/api/ogp.ts から移植
  */
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import { requireAuth, corsHeaders } from '../../shared/src/firebase-auth'
-import type { OgpData } from '../../shared/src/types'
+import { requireAuth, corsHeaders } from './firebase-auth'
+import type { OgpData } from './types'
 
 // SSRF対策: プライベートIPレンジのホスト名ブロック
 const BLOCKED_HOSTNAMES = ['localhost', '127.0.0.1', '::1', '0.0.0.0', '169.254.169.254']
