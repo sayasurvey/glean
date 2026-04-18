@@ -7,6 +7,12 @@ Parameters:
     Default: "myglean.jp"
   AcmCertificateArn:
     Type: String
+  BackendApiEndpoint:
+    Type: String
+    Description: >
+      Lambda API Gateway エンドポイント URL
+      （例: https://xxxx.execute-api.ap-northeast-1.amazonaws.com/prod）
+      deploy-backend.sh 実行後に glean スタックの Outputs から取得
 
 Resources:
   # Frontend S3 Bucket
@@ -35,7 +41,7 @@ Resources:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref FrontendBucket
-      PolicyText:
+      PolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
@@ -60,6 +66,31 @@ Resources:
           - Id: S3Origin
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
             OriginAccessControlId: !Ref FrontendOAC
+          - Id: ApiOrigin
+            DomainName: !Select [2, !Split ["/", !Ref BackendApiEndpoint]]
+            OriginPath: /prod
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+        CacheBehaviors:
+          - PathPattern: /api/*
+            TargetOriginId: ApiOrigin
+            ViewerProtocolPolicy: https-only
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - PATCH
+              - POST
+              - DELETE
+            CachedMethods:
+              - GET
+              - HEAD
+            CachePolicyId: 4135ea2d-6df7-47ed-819b-0daf2741003c
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
         DefaultCacheBehavior:
           TargetOriginId: S3Origin
           ViewerProtocolPolicy: redirect-to-https
