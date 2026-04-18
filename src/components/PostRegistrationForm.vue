@@ -65,6 +65,9 @@ const handleConfirm = async () => {
       headers: authHeaders,
     })
     summary.value = geminiData.summary
+    if (geminiData.suggestedTags.length > 0) {
+      tags.value = geminiData.suggestedTags
+    }
   } catch {
     summary.value = ''
   }

@@ -23,6 +23,7 @@ export interface OgpData {
 
 export interface GeminiSummaryData {
   summary: string
+  suggestedTags: string[]
 }
 
 export interface PostErrorMap {

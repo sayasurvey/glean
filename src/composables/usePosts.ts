@@ -109,6 +109,9 @@ export const usePosts = () => {
           headers: authHeaders,
         })
         summary = geminiData.summary
+        if (tags.length === 0 && geminiData.suggestedTags.length > 0) {
+          tags = geminiData.suggestedTags
+        }
       } catch {
         // Gemini失敗は続行
       }
