@@ -43,7 +43,7 @@ const emit = defineEmits<{
     </div>
 
     <!-- 記事グリッド -->
-    <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <PostTile
         v-for="post in posts"
         :key="post.id"

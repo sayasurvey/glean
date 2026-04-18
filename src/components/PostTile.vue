@@ -31,7 +31,7 @@ const handleDelete = (e: Event) => {
     @click="handleCardClick"
   >
     <!-- OGP画像 -->
-    <div class="h-40 w-full overflow-hidden bg-gray-100">
+    <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
       <img
         v-if="post.ogpImageUrl"
         :src="post.ogpImageUrl"
@@ -45,7 +45,7 @@ const handleDelete = (e: Event) => {
     </div>
 
     <!-- コンテンツ -->
-    <div class="flex flex-1 flex-col p-4">
+    <div class="flex flex-col p-4">
       <h3 class="mb-1 line-clamp-2 text-sm font-semibold text-gray-900">
         {{ post.title || post.url }}
       </h3>

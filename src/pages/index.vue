@@ -5,7 +5,7 @@ definePageMeta({
 
 const { currentUser, logout } = useAuth()
 const { posts, isLoading, error, fetchPosts, deletePost, stopListening } = usePosts()
-const { keyword, activeTags, filteredPosts, availableTags } = useSearch(posts)
+const { keyword, filteredPosts } = useSearch(posts)
 
 const showRegistrationForm = ref(false)
 
@@ -31,12 +31,6 @@ const handleLogout = async () => {
 
 const handleRegistered = () => {
   showRegistrationForm.value = false
-}
-
-const handleTagFilter = (tag: string) => {
-  if (!activeTags.value.includes(tag)) {
-    activeTags.value = [...activeTags.value, tag]
-  }
 }
 
 const handleDeletePost = async (postId: string) => {
@@ -85,12 +79,7 @@ const handleDeletePost = async (postId: string) => {
 
       <!-- 検索・フィルタ -->
       <div class="mb-6">
-        <PostSearchBar
-          v-model="keyword"
-          :active-tags="activeTags"
-          :available-tags="availableTags"
-          @update:active-tags="activeTags = $event"
-        />
+        <PostSearchBar v-model="keyword" />
       </div>
 
       <!-- エラー表示 -->
@@ -104,7 +93,6 @@ const handleDeletePost = async (postId: string) => {
         :current-user-id="currentUser?.uid ?? null"
         :is-loading="isLoading"
         @delete-post="handleDeletePost"
-        @tag-filter="handleTagFilter"
       />
     </main>
   </div>

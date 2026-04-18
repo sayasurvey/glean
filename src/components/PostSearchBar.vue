@@ -1,25 +1,13 @@
 <script setup lang="ts">
 interface Props {
   modelValue: string
-  activeTags: string[]
-  availableTags: string[]
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
-  'update:activeTags': [tags: string[]]
 }>()
-
-const toggleTag = (tag: string) => {
-  const current = props.activeTags
-  if (current.includes(tag)) {
-    emit('update:activeTags', current.filter((t) => t !== tag))
-  } else {
-    emit('update:activeTags', [...current, tag])
-  }
-}
 </script>
 
 <template>
@@ -41,24 +29,6 @@ const toggleTag = (tag: string) => {
         @click="emit('update:modelValue', '')"
       >
         ×
-      </button>
-    </div>
-
-    <!-- タグフィルタ -->
-    <div v-if="availableTags.length > 0" class="flex flex-wrap gap-2">
-      <button
-        v-for="tag in availableTags"
-        :key="tag"
-        type="button"
-        class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
-        :class="
-          activeTags.includes(tag)
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        "
-        @click="toggleTag(tag)"
-      >
-        {{ tag }}
       </button>
     </div>
   </div>
