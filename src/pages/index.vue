@@ -43,7 +43,7 @@ const handleDeletePost = async (postId: string) => {
     <!-- ヘッダー -->
     <header class="border-b border-gray-200 bg-white px-6 py-4">
       <div class="mx-auto flex max-w-6xl items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-900">myGlean</h1>
+        <img src="~/assets/logo.png" alt="myGlean" class="h-10" />
         <div class="flex items-center gap-4">
           <span class="text-sm text-gray-600">{{ currentUser?.email }}</span>
           <button
@@ -70,7 +70,7 @@ const handleDeletePost = async (postId: string) => {
         <h2 class="text-lg font-semibold text-gray-800">記事一覧</h2>
         <button
           v-if="!showRegistrationForm"
-          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           @click="showRegistrationForm = true"
         >
           + 記事を登録

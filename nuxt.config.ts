@@ -28,5 +28,20 @@ export default defineNuxtConfig({
       external: ['firebase-admin', 'firebase-admin/app', 'firebase-admin/auth'],
     },
   },
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+      ],
+      meta: [
+        { property: 'og:title', content: 'myGlean' },
+        { property: 'og:description', content: 'ITに関心を持つ人のための技術記事管理アプリ' },
+        { property: 'og:image', content: '/ogp.png' },
+        { property: 'og:type', content: 'website' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:image', content: '/ogp.png' },
+      ],
+    },
+  },
   compatibilityDate: '2024-11-01',
 })
