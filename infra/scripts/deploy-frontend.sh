@@ -41,6 +41,8 @@ echo "  S3 Bucket: $BUCKET_NAME"
 # 2. Build Nuxt application
 echo -e "\n${YELLOW}[2/4] Building Nuxt application...${NC}"
 cd "$(dirname "$0")/../../"
+echo -e "  Cleaning build cache..."
+rm -rf .nuxt .output
 export NUXT_PUBLIC_API_BASE="$API_ENDPOINT"
 npm run generate
 

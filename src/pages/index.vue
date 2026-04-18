@@ -43,7 +43,7 @@ const handleDeletePost = async (postId: string) => {
     <!-- ヘッダー -->
     <header class="border-b border-gray-200 bg-white px-6 py-4">
       <div class="mx-auto flex max-w-6xl items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-900">Glean</h1>
+        <h1 class="text-xl font-bold text-gray-900">myGlean</h1>
         <div class="flex items-center gap-4">
           <span class="text-sm text-gray-600">{{ currentUser?.email }}</span>
           <button

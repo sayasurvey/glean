@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
 
-const emit = defineEmits<{
-  success: []
-}>()
-
-const { loginWithEmail, error, isLoading } = useAuth()
+const { loginWithEmail, error } = useAuth()
+const isLoading = ref(false)
 
 const email = ref('')
 const password = ref('')
@@ -29,11 +26,14 @@ const handleSubmit = async () => {
   if (!validateEmail(email.value)) return
   if (!password.value) return
 
+  isLoading.value = true
   try {
     await loginWithEmail(email.value, password.value)
-    emit('success')
+    // ナビゲーションは login.vue の watch (isAuthenticated) が担当
   } catch {
     // error は useAuth 内で設定済み
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

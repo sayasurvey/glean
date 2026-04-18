@@ -3,21 +3,18 @@ import { useAuth } from '~/composables/useAuth'
 
 const { isAuthenticated, isLoading, error } = useAuth()
 
-onMounted(async () => {
-  if (!isLoading.value && isAuthenticated.value) {
-    await navigateTo('/')
-  }
-})
-
-watch([isLoading, isAuthenticated], async ([loading, authenticated]) => {
-  if (!loading && authenticated) {
-    await navigateTo('/')
-  }
-})
-
-const handleSuccess = async () => {
-  await navigateTo('/')
-}
+// isLoading が false かつ isAuthenticated が true になった瞬間に遷移する
+// immediate: true により、マウント時点で既にログイン済みの場合もカバー
+// onAuthStateChanged の確認後に遷移するため、ミドルウェアとの競合を防ぐ
+watch(
+  [isLoading, isAuthenticated],
+  ([loading, authenticated]) => {
+    if (!loading && authenticated) {
+      navigateTo('/')
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -27,16 +24,9 @@ const handleSuccess = async () => {
         <h1 class="text-2xl font-bold text-gray-900">ログイン</h1>
       </div>
 
-      <div v-if="isLoading" class="flex items-center justify-center space-x-2 py-4">
-        <div class="h-2 w-2 animate-bounce rounded-full bg-blue-500" />
-        <div class="h-2 w-2 animate-bounce rounded-full bg-blue-500" style="animation-delay: 0.1s" />
-        <div class="h-2 w-2 animate-bounce rounded-full bg-blue-500" style="animation-delay: 0.2s" />
-        <span class="ml-2 text-sm text-gray-600">認証を処理中...</span>
-      </div>
-
       <p v-if="error" class="rounded bg-red-50 p-3 text-sm text-red-700">{{ error }}</p>
 
-      <AuthGoogleButton @success="handleSuccess" />
+      <AuthGoogleButton />
 
       <div class="relative">
         <div class="absolute inset-0 flex items-center">
@@ -47,7 +37,7 @@ const handleSuccess = async () => {
         </div>
       </div>
 
-      <AuthLoginForm @success="handleSuccess" />
+      <AuthLoginForm />
     </div>
 
     <AuthDebug />

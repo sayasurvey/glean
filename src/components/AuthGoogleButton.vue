@@ -1,27 +1,17 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
-import { ref, watch } from 'vue'
 
-const emit = defineEmits<{
-  success: []
-}>()
-
-const { loginWithGoogle, error, isLoading, isAuthenticated } = useAuth()
+const { loginWithGoogle, error } = useAuth()
+const isLoading = ref(false)
 
 const handleClick = async () => {
+  isLoading.value = true
   try {
     await loginWithGoogle()
-  } catch {
-    // エラーは useAuth 内で error に設定される
+  } finally {
+    isLoading.value = false
   }
 }
-
-// ページがリロードされた後、認証状態が変わったら success を発火
-watch(isAuthenticated, (authenticated) => {
-  if (authenticated) {
-    emit('success')
-  }
-})
 </script>
 
 <template>

@@ -1,6 +1,5 @@
 import {
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -77,31 +76,6 @@ const initializeAuth = (auth: ReturnType<typeof useFirebaseAuth>) => {
     currentUser.value = user
     isLoading.value = false
   })
-
-  // リダイレクト結果を処理（Google認証など）
-  getRedirectResult(auth)
-    .then(async (result) => {
-      if (result?.user) {
-        const isNew = result.user.metadata.creationTime === result.user.metadata.lastSignInTime
-        if (isNew) {
-          try {
-            await createUserProfile(result.user, 'google')
-          } catch (e) {
-            // プロフィール作成エラーは認証の妨げにはしない
-          }
-        }
-      }
-    })
-    .catch((e: unknown) => {
-      const code = (e as { code?: string }).code ?? ''
-
-      // ユーザーがキャンセルした場合やリダイレクトがない場合はエラーを表示しない
-      if (code && code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
-        if (!error.value) {
-          error.value = getErrorMessage(code)
-        }
-      }
-    })
 }
 
 export const useAuth = () => {
@@ -118,13 +92,26 @@ export const useAuth = () => {
     error.value = null
     try {
       const provider = new GoogleAuthProvider()
-      // カスタムドメインでのクロスオリジン問題を避けるためリダイレクト方式を使用
-      await signInWithRedirect(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      const isNew = result.user.metadata.creationTime === result.user.metadata.lastSignInTime
+      if (isNew) {
+        try {
+          await createUserProfile(result.user, 'google')
+        } catch {
+          // プロフィール作成エラーは認証の妨げにはしない
+        }
+      }
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? ''
 
+      // ユーザーがキャンセルした場合はエラーを表示しない
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        return
+      }
       if (code === 'auth/unauthorized-domain') {
         error.value = 'このドメインからの認証は許可されていません。Firebase ConsoleでJavaScriptリダイレクトURIを確認してください。'
+      } else if (code === 'auth/popup-blocked') {
+        error.value = 'ポップアップがブロックされました。ブラウザのポップアップを許可してから再試行してください。'
       } else if (code === 'auth/invalid-api-key') {
         error.value = 'FirebaseのAPI設定に問題があります。管理者にお問い合わせください。'
       } else if (code === 'auth/operation-not-allowed') {
