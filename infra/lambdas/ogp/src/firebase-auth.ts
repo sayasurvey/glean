@@ -63,6 +63,12 @@ export const requireAuth = async (event: APIGatewayProxyEvent): Promise<string> 
   }
 
   const token = authHeader.slice(7)
+  // デバッグ: トークンの形式確認（先頭10文字のみ）
+  console.log('[Firebase Auth] token info:', {
+    length: token.length,
+    prefix: token.slice(0, 10),
+    isJWT: token.split('.').length === 3,
+  })
   try {
     const decoded = await getAuth().verifyIdToken(token)
     return decoded.uid

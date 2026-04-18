@@ -14,7 +14,7 @@ import { getFirestore } from 'firebase/firestore'
 import type { User } from 'firebase/auth'
 import type { AuthErrorMap, UserProfile } from '~/types/auth'
 import { useFirebaseAuth } from '~/plugins/firebase.client'
-import { ref, computed, readonly } from 'vue'
+import { shallowRef, computed, readonly } from 'vue'
 
 const AUTH_ERROR_MAP: AuthErrorMap = {
   'auth/network-request-failed': 'ネットワーク接続を確認するか、しばらく時間をおいてから再試行してください',
@@ -40,7 +40,7 @@ const getErrorMessage = (code: string): string => {
   return AUTH_ERROR_MAP[code] ?? '予期しないエラーが発生しました'
 }
 
-const currentUser = ref<User | null>(null)
+const currentUser = shallowRef<User | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 let unsubscribe: (() => void) | null = null

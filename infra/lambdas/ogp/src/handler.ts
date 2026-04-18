@@ -29,6 +29,7 @@ const isBlockedIp = (ip: string): boolean => {
 
 /**
  * ホスト名をDNS解決してプライベートIPへの解決をブロック（DNSリバインディング対策）
+ * DNS解決自体が失敗した場合（NXDOMAIN等）は許可する（フェッチ時に自然に失敗するため）
  */
 const validateResolvedIp = async (hostname: string): Promise<void> => {
   const [v4, v6] = await Promise.all([
@@ -36,11 +37,10 @@ const validateResolvedIp = async (hostname: string): Promise<void> => {
     dns.resolve6(hostname).catch(() => [] as string[]),
   ])
   const allIps = [...v4, ...v6]
-  if (allIps.length === 0) {
-    throw new Error('無効なURLです')
-  }
+  // IPが解決できた場合のみプライベートIPチェックを行う
   for (const ip of allIps) {
     if (isBlockedIp(ip)) {
+      console.warn('[OGP] Blocked private IP detected:', { hostname, ip })
       throw new Error('無効なURLです')
     }
   }
@@ -217,7 +217,8 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
   try {
     const parsedUrl = validateUrl(url)
     await validateResolvedIp(parsedUrl.hostname.toLowerCase())
-  } catch {
+  } catch (e) {
+    console.error('[OGP] URL validation failed:', { url, error: (e as Error).message })
     return {
       statusCode: 400,
       headers: corsHeaders(origin),
@@ -236,13 +237,15 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       siteName: extractMeta(html, 'og:site_name'),
     }
 
+    console.log('[OGP] success:', { url, title: ogpData.title, hasImage: !!ogpData.imageUrl })
+
     return {
       statusCode: 200,
       headers: corsHeaders(origin),
       body: JSON.stringify(ogpData),
     }
   } catch (err) {
-    console.error('[OGP] fetch error:', err)
+    console.error('[OGP] fetch error:', { url, error: String(err) })
     // エラー時も正常系のレスポンスを返す（フロントエンド側で処理）
     const ogpData: OgpData = {
       title: '',
