@@ -18,7 +18,7 @@ Globals:
 Parameters:
   AllowedOrigin:
     Type: String
-    Description: Origin header value for CORS
+    Description: Origin header value for CORS (unused, kept for backward compat)
     Default: "https://www.myglean.jp"
 
 Resources:
@@ -110,7 +110,7 @@ Resources:
       Cors:
         AllowMethods: "'GET,POST,OPTIONS'"
         AllowHeaders: "'Content-Type,Authorization'"
-        AllowOrigin: !Sub "'${AllowedOrigin}'"
+        AllowOrigin: "'*'"
 
 Outputs:
   ApiEndpoint:

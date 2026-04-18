@@ -77,8 +77,12 @@ const FETCH_HEADERS = {
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
-  'Accept-Encoding': 'gzip, deflate, br',
   'Cache-Control': 'no-cache',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'none',
+  'Sec-Fetch-User': '?1',
+  'Upgrade-Insecure-Requests': '1',
 }
 
 /**
@@ -230,6 +234,8 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
   try {
     const html = await fetchHtmlWithCookies(url)
 
+    console.log('[OGP] html fetched:', { url, htmlLength: html.length, htmlPrefix: html.slice(0, 100) })
+
     const ogpData: OgpData = {
       title: extractTitle(html),
       description: extractMeta(html, 'og:description') ?? extractMeta(html, 'description') ?? '',
@@ -245,7 +251,8 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       body: JSON.stringify(ogpData),
     }
   } catch (err) {
-    console.error('[OGP] fetch error:', { url, error: String(err) })
+    const e = err as Error
+    console.error('[OGP] fetch error:', { url, error: String(err), name: e.name, message: e.message })
     // エラー時も正常系のレスポンスを返す（フロントエンド側で処理）
     const ogpData: OgpData = {
       title: '',
