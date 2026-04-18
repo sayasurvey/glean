@@ -8,11 +8,19 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/../.env"
+if [ ! -f "$ENV_FILE" ]; then
+  echo -e "${RED}Error: $ENV_FILE not found. Copy infra/.env.example to infra/.env and fill in the values.${NC}"
+  exit 1
+fi
+set -a; source "$ENV_FILE"; set +a
+
 # Configuration
 STACK_NAME="glean"
 REGION="ap-northeast-1"
 API_ENDPOINT=""
-BUCKET_NAME="glean-frontend-YOUR_ACCOUNT_ID"
+BUCKET_NAME="$S3_BUCKET_NAME"
 DISTRIBUTION_ID=""
 
 echo -e "${YELLOW}================================${NC}"

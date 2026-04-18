@@ -40,7 +40,12 @@ test-results/
 
 # AWS SAM
 infra/.aws-sam/
+infra/.env
 infra/.env.local
+infra/samconfig.toml
 infra/lambdas/*/dist/
 infra/lambdas/*/node_modules/
 infra/build/
+
+# AWSの機密情報を含むドキュメント
+CLOUDFRONT_TROUBLESHOOTING.md

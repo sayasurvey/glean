@@ -7,6 +7,14 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/../.env"
+if [ ! -f "$ENV_FILE" ]; then
+  echo -e "${RED}Error: $ENV_FILE not found. Copy infra/.env.example to infra/.env and fill in the values.${NC}"
+  exit 1
+fi
+set -a; source "$ENV_FILE"; set +a
+
 echo -e "${YELLOW}================================${NC}"
 echo -e "${YELLOW}Glean Frontend Infrastructure${NC}"
 echo -e "${YELLOW}================================${NC}"
@@ -37,7 +45,7 @@ aws cloudformation deploy \
   --parameter-overrides \
     BackendApiEndpoint="$API_ENDPOINT" \
     DomainName=myglean.jp \
-    AcmCertificateArn=arn:aws:acm:us-east-1:YOUR_ACCOUNT_ID:certificate/YOUR_CERT_ID \
+    AcmCertificateArn="$ACM_CERTIFICATE_ARN" \
   --capabilities CAPABILITY_IAM
 
 echo -e "\n${GREEN}================================${NC}"

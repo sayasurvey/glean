@@ -7,7 +7,6 @@ Parameters:
     Default: "myglean.jp"
   AcmCertificateArn:
     Type: String
-    Default: "arn:aws:acm:us-east-1:YOUR_ACCOUNT_ID:certificate/YOUR_CERT_ID"
 
 Resources:
   # Frontend S3 Bucket
