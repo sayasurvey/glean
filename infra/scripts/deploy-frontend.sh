@@ -69,13 +69,22 @@ aws s3 sync \
   .output/public/ \
   "s3://$BUCKET_NAME/"
 
+# public/ ディレクトリの静的ファイル（favicon, ogp等）を明示的にアップロード
+if [ -d "public" ] && [ "$(ls -A public 2>/dev/null)" ]; then
+  aws s3 sync \
+    --region "$REGION" \
+    public/ \
+    "s3://$BUCKET_NAME/"
+  echo -e "${GREEN}  ✓ public/ ディレクトリを同期${NC}"
+fi
+
 echo -e "${GREEN}✓ Files synced to S3${NC}"
 
 # 4. CloudFront cache invalidation (if Distribution exists)
 echo -e "\n${YELLOW}[4/4] CloudFront cache invalidation...${NC}"
+# バケット名をオリジンとして使用するDistribution IDを検索
 DISTRIBUTION_ID=$(aws cloudfront list-distributions \
-  --region "$REGION" \
-  --query "DistributionList.Items[?Comment=='glean'].Id" \
+  --query "DistributionList.Items[?contains(Origins.Items[0].DomainName, '${BUCKET_NAME}')].Id" \
   --output text 2>/dev/null || echo "")
 
 if [ -z "$DISTRIBUTION_ID" ] || [ "$DISTRIBUTION_ID" == "None" ]; then
