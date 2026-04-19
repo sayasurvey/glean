@@ -18,12 +18,12 @@ const handleGoogleSuccess = async () => {
       </div>
 
       <div v-if="showVerification" class="rounded-md bg-blue-50 p-4 text-center">
-        <p class="text-sm font-medium text-blue-800">確認メールを送信しました</p>
-        <p class="mt-1 text-sm text-blue-700">
+        <p class="text-sm font-medium text-green-800">確認メールを送信しました</p>
+        <p class="mt-1 text-sm text-green-700">
           登録したメールアドレスに確認メールを送信しました。
           メール内のリンクをクリックして登録を完了してください。
         </p>
-        <NuxtLink to="/login" class="mt-4 block text-sm text-blue-600 hover:underline">
+        <NuxtLink to="/login" class="mt-4 block text-sm text-green-600 hover:underline">
           ログインページへ
         </NuxtLink>
       </div>

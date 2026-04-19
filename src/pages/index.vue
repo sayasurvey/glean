@@ -70,7 +70,7 @@ const handleDeletePost = async (postId: string) => {
         <h2 class="text-lg font-semibold text-gray-800">記事一覧</h2>
         <button
           v-if="!showRegistrationForm"
-          class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
           @click="showRegistrationForm = true"
         >
           + 記事を登録

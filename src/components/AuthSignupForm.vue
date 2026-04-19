@@ -73,7 +73,7 @@ const handleSubmit = async () => {
         type="email"
         autocomplete="email"
         required
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
         :class="{ 'border-red-500': emailError }"
         @blur="validateEmail(email)"
       />
@@ -90,7 +90,7 @@ const handleSubmit = async () => {
         type="password"
         autocomplete="new-password"
         required
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
         :class="{ 'border-red-500': passwordError }"
         @blur="validatePassword(password)"
       />
@@ -107,7 +107,7 @@ const handleSubmit = async () => {
         type="password"
         autocomplete="new-password"
         required
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
         :class="{ 'border-red-500': passwordConfirmError }"
         @blur="validatePasswordConfirm(passwordConfirm)"
       />
@@ -119,7 +119,7 @@ const handleSubmit = async () => {
     <button
       type="submit"
       :disabled="isLoading"
-      class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+      class="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
     >
       <span v-if="isLoading">登録中...</span>
       <span v-else>アカウントを作成</span>
@@ -127,7 +127,7 @@ const handleSubmit = async () => {
 
     <p class="text-center text-sm">
       すでにアカウントをお持ちの方は
-      <NuxtLink to="/login" class="text-blue-600 hover:underline">ログイン</NuxtLink>
+      <NuxtLink to="/login" class="text-green-600 hover:underline">ログイン</NuxtLink>
     </p>
   </form>
 </template>

@@ -58,7 +58,7 @@ const handleDelete = (e: Event) => {
         <span
           v-for="tag in post.tags"
           :key="tag"
-          class="cursor-pointer rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-blue-100 hover:text-blue-700"
+          class="cursor-pointer rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-green-100 hover:text-green-700"
           @click.stop="emit('tagClick', tag)"
         >
           {{ tag }}

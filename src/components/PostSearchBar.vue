@@ -19,7 +19,7 @@ const emit = defineEmits<{
         :value="modelValue"
         type="text"
         placeholder="タイトル・概要で検索"
-        class="w-full rounded-md border border-gray-300 py-2 pl-9 pr-9 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        class="w-full rounded-md border border-gray-300 py-2 pl-9 pr-9 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
         @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       />
       <button

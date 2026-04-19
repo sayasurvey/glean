@@ -63,19 +63,36 @@ echo -e "${GREEN}✓ Nuxt build completed${NC}"
 
 # 3. Sync to S3
 echo -e "\n${YELLOW}[3/4] Syncing files to S3...${NC}"
+
+# HTMLファイル: ブラウザキャッシュ禁止（デプロイ後に必ず最新を取得させる）
 aws s3 sync \
   --region "$REGION" \
   --delete \
+  --exclude "*" \
+  --include "*.html" \
+  --cache-control "no-store" \
   .output/public/ \
   "s3://$BUCKET_NAME/"
+echo -e "${GREEN}  ✓ HTMLファイルを同期 (Cache-Control: no-store)${NC}"
+
+# JS/CSS/画像: 長期キャッシュ（コンテンツハッシュ付きファイル名のため安全）
+aws s3 sync \
+  --region "$REGION" \
+  --delete \
+  --exclude "*.html" \
+  --cache-control "max-age=31536000, immutable" \
+  .output/public/ \
+  "s3://$BUCKET_NAME/"
+echo -e "${GREEN}  ✓ 静的アセットを同期 (Cache-Control: max-age=31536000, immutable)${NC}"
 
 # public/ ディレクトリの静的ファイル（favicon, ogp等）を明示的にアップロード
 if [ -d "public" ] && [ "$(ls -A public 2>/dev/null)" ]; then
   aws s3 sync \
     --region "$REGION" \
+    --cache-control "max-age=86400" \
     public/ \
     "s3://$BUCKET_NAME/"
-  echo -e "${GREEN}  ✓ public/ ディレクトリを同期${NC}"
+  echo -e "${GREEN}  ✓ public/ ディレクトリを同期 (Cache-Control: max-age=86400)${NC}"
 fi
 
 echo -e "${GREEN}✓ Files synced to S3${NC}"

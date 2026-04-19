@@ -66,17 +66,17 @@ const handleBlur = () => {
 <template>
   <div class="relative">
     <div
-      class="flex min-h-[2.5rem] flex-wrap gap-1 rounded-md border border-gray-300 px-2 py-1.5 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500"
+      class="flex min-h-[2.5rem] flex-wrap gap-1 rounded-md border border-gray-300 px-2 py-1.5 focus-within:border-green-500 focus-within:ring-1 focus-within:ring-green-500"
     >
       <span
         v-for="(tag, index) in modelValue"
         :key="tag"
-        class="flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-sm text-blue-800"
+        class="flex items-center gap-1 rounded bg-green-100 px-2 py-0.5 text-sm text-green-800"
       >
         {{ tag }}
         <button
           type="button"
-          class="text-blue-600 hover:text-blue-800"
+          class="text-green-600 hover:text-green-800"
           @click="removeTag(index)"
         >
           ×

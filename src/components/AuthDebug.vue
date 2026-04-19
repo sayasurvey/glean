@@ -53,7 +53,7 @@ const isDebugMode = ref(false)
 
         <button
           @click="() => console.log('[Debug]', { currentUser, isLoading, error, isAuthenticated })"
-          class="w-full bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
+          class="w-full bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
         >
           コンソールに出力
         </button>

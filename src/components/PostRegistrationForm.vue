@@ -109,7 +109,7 @@ const handleBack = () => {
           v-model="url"
           type="url"
           placeholder="https://example.com/article"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           :class="{ 'border-red-500': urlError }"
           @keydown.enter="handleConfirm"
         />
@@ -125,7 +125,7 @@ const handleBack = () => {
         </button>
         <button
           type="button"
-          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
           @click="handleConfirm"
         >
           確認
@@ -135,7 +135,7 @@ const handleBack = () => {
 
     <!-- Step 2: ローディング -->
     <div v-else-if="step === 'loading'" class="flex flex-col items-center py-8">
-      <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+      <div class="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
       <p class="mt-3 text-sm text-gray-500">記事情報を取得中...</p>
     </div>
 
@@ -150,7 +150,7 @@ const handleBack = () => {
           v-if="ogpData.imageUrl"
           :src="ogpData.imageUrl"
           alt="OGP画像"
-          class="mb-2 h-32 w-full rounded object-cover"
+          class="mb-2 mx-auto block max-h-[30vh] w-auto rounded object-contain"
         />
         <div v-else class="mb-2 flex h-20 items-center justify-center rounded bg-gray-100">
           <span class="text-sm text-gray-400">画像なし</span>
@@ -160,7 +160,7 @@ const handleBack = () => {
           <input
             v-model="ogpData.title"
             type="text"
-            class="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+            class="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-green-500 focus:outline-none"
           />
         </div>
         <div v-if="summary" class="mb-1">
@@ -186,7 +186,7 @@ const handleBack = () => {
         </button>
         <button
           type="button"
-          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
           @click="handleRegister"
         >
           登録
