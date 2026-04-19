@@ -18,7 +18,7 @@ Globals:
 Parameters:
   AllowedOrigin:
     Type: String
-    Description: Origin header value for CORS (unused, kept for backward compat)
+    Description: Allowed origin for CORS and Lambda ALLOWED_ORIGIN env var
     Default: "https://www.myglean.jp"
 
 Resources:
@@ -37,8 +37,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: glean-ogp
-      CodeUri: lambdas/ogp/
-      Handler: handler.handler
+      CodeUri: lambdas/
+      Handler: ogp/src/handler.handler
       Description: OGP data fetcher with Firebase auth
       Policies:
         - SSMParameterReadPolicy:
@@ -60,7 +60,7 @@ Resources:
         Target: es2022
         Sourcemap: true
         EntryPoints:
-          - src/handler.ts
+          - ogp/src/handler.ts
         External:
           - firebase-admin
           - firebase-admin/app
@@ -71,8 +71,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: glean-gemini
-      CodeUri: lambdas/gemini/
-      Handler: handler.handler
+      CodeUri: lambdas/
+      Handler: gemini/src/handler.handler
       Description: Gemini summary generator with Firebase auth
       Policies:
         - SSMParameterReadPolicy:
@@ -94,7 +94,7 @@ Resources:
         Target: es2022
         Sourcemap: true
         EntryPoints:
-          - src/handler.ts
+          - gemini/src/handler.ts
         External:
           - firebase-admin
           - firebase-admin/app

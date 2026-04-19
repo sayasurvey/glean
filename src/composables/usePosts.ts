@@ -178,9 +178,13 @@ export const usePosts = () => {
       batch.delete(doc(db, 'posts', postId))
 
       if (target.tags?.length > 0) {
-        for (const tag of target.tags) {
-          batch.update(doc(db, 'tags', tag), { count: increment(-1), updatedAt: serverTimestamp() })
-        }
+        const tagRefs = target.tags.map((tag) => doc(db, 'tags', tag))
+        const tagSnaps = await Promise.all(tagRefs.map((ref) => getDoc(ref)))
+        tagSnaps.forEach((snap, i) => {
+          if (snap.exists() && (snap.data().count ?? 0) > 0) {
+            batch.update(tagRefs[i], { count: increment(-1), updatedAt: serverTimestamp() })
+          }
+        })
       }
 
       await batch.commit()

@@ -4,8 +4,8 @@
  */
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { requireAuth, corsHeaders, getSSMParameter } from './firebase-auth'
-import type { GeminiSummaryData } from './types'
+import { requireAuth, corsHeaders, getSSMParameter } from '../../shared/src/firebase-auth'
+import type { GeminiSummaryData } from '../../shared/src/types'
 
 /**
  * リクエストボディ型

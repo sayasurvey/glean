@@ -13,7 +13,7 @@ const ssmClient = new SSMClient({ region: process.env.AWS_REGION || 'ap-northeas
 /**
  * AWS SSM Parameter Store からパラメータを取得
  */
-const getSSMParameter = async (paramName: string): Promise<string> => {
+export const getSSMParameter = async (paramName: string): Promise<string> => {
   const client = ssmClient
   try {
     const response = await client.send(

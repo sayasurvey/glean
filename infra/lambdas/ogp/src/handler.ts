@@ -4,8 +4,8 @@
  */
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { promises as dns } from 'dns'
-import { requireAuth, corsHeaders } from './firebase-auth'
-import type { OgpData } from './types'
+import { requireAuth, corsHeaders } from '../../shared/src/firebase-auth'
+import type { OgpData } from '../../shared/src/types'
 
 // SSRF対策: プライベートIPレンジのホスト名ブロック
 const BLOCKED_HOSTNAMES = ['localhost', '127.0.0.1', '::1', '0.0.0.0', '169.254.169.254']
@@ -119,7 +119,9 @@ const fetchHtmlWithCookies = async (urlString: string, maxRedirects = 10): Promi
     }
 
     if (response.status >= 200 && response.status < 300) {
-      return await response.text()
+      const MAX_HTML_CHARS = 2 * 1024 * 1024
+      const text = await response.text()
+      return text.length > MAX_HTML_CHARS ? text.slice(0, MAX_HTML_CHARS) : text
     }
 
     if (response.status >= 300 && response.status < 400) {
