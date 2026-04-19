@@ -9,6 +9,17 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$SCRIPT_DIR/../../"
+
+# ルートの .env（Firebase設定等）を読み込む
+ROOT_ENV_FILE="$ROOT_DIR/.env"
+if [ ! -f "$ROOT_ENV_FILE" ]; then
+  echo -e "${RED}Error: $ROOT_ENV_FILE not found. Copy .env.example to .env and fill in the values.${NC}"
+  exit 1
+fi
+set -a; source "$ROOT_ENV_FILE"; set +a
+
+# infra/.env（AWS設定）を読み込む
 ENV_FILE="$SCRIPT_DIR/../.env"
 if [ ! -f "$ENV_FILE" ]; then
   echo -e "${RED}Error: $ENV_FILE not found. Copy infra/.env.example to infra/.env and fill in the values.${NC}"
