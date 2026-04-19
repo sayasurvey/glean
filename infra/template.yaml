@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Glean - Lambda + API Gateway Backend
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [arm64]
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        SSM_FIREBASE_SERVICE_ACCOUNT: /glean/firebase-service-account
+        SSM_GEMINI_API_KEY: /glean/gemini-api-key
+    Layers:
+      - !Ref SharedDepsLayer
+
+Parameters:
+  AllowedOrigin:
+    Type: String
+    Description: Allowed origin for CORS and Lambda ALLOWED_ORIGIN env var
+    Default: "https://www.myglean.jp"
+
+Resources:
+  SharedDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: glean-shared-deps
+      ContentUri: lambdas/shared/
+      CompatibleRuntimes: [nodejs22.x]
+      CompatibleArchitectures: [arm64]
+    Metadata:
+      BuildMethod: nodejs22.x
+      BuildArchitecture: arm64
+
+  OgpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: glean-ogp
+      CodeUri: lambdas/
+      Handler: ogp/src/handler.handler
+      Description: OGP data fetcher with Firebase auth
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: glean/*
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
+      Events:
+        OgpApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GleanApi
+            Path: /api/ogp
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - ogp/src/handler.ts
+        External:
+          - firebase-admin
+          - firebase-admin/app
+          - firebase-admin/auth
+          - "@aws-sdk/client-ssm"
+
+  GeminiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: glean-gemini
+      CodeUri: lambdas/
+      Handler: gemini/src/handler.handler
+      Description: Gemini summary generator with Firebase auth
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: glean/*
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
+      Events:
+        GeminiApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GleanApi
+            Path: /api/gemini
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - gemini/src/handler.ts
+        External:
+          - firebase-admin
+          - firebase-admin/app
+          - firebase-admin/auth
+          - "@aws-sdk/client-ssm"
+
+  GleanApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: glean-api
+      StageName: prod
+      EndpointConfiguration: REGIONAL
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: !Sub "'${AllowedOrigin}'"
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingBurstLimit: 20
+          ThrottlingRateLimit: 10
+
+Outputs:
+  ApiEndpoint:
+    Value: !Sub https://${GleanApi}.execute-api.${AWS::Region}.amazonaws.com/prod
+    Description: API Gateway endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-ApiEndpoint
+
+  GleanApiId:
+    Value: !Ref GleanApi
+    Description: API Gateway ID
+    Export:
+      Name: !Sub ${AWS::StackName}-GleanApiId

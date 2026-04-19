@@ -1,0 +1,15 @@
+diff --git a/node_modules/vue-bundle-renderer/dist/runtime.mjs b/node_modules/vue-bundle-renderer/dist/runtime.mjs
+index 0af013f..044df9b 100644
+--- a/node_modules/vue-bundle-renderer/dist/runtime.mjs
++++ b/node_modules/vue-bundle-renderer/dist/runtime.mjs
+@@ -23,8 +23,8 @@ function createRendererContext({ manifest, precomputed, buildAssetsURL }) {
+     ctx._entrypoints = manifestEntries.filter((e) => e[1].isEntry).map(([module]) => module);
+   }
+   if (precomputed) {
+-    ctx._dependencies = precomputed.dependencies;
+-    ctx._entrypoints = precomputed.entrypoints;
++    ctx._dependencies = precomputed.dependencies ?? {};
++    ctx._entrypoints = precomputed.entrypoints ?? [];
+   } else if (manifest) {
+     updateManifest(manifest);
+   }

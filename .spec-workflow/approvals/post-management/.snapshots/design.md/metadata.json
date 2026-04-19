@@ -1,0 +1,14 @@
+{
+  "filePath": ".spec-workflow/specs/post-management/design.md",
+  "currentVersion": 1,
+  "snapshots": [
+    {
+      "version": 1,
+      "filename": "snapshot-001.json",
+      "timestamp": "2026-04-10T10:33:23.549Z",
+      "trigger": "initial",
+      "approvalId": "approval_1775817203545_3wf27m4it",
+      "approvalTitle": "投稿一覧・登録機能 - 設計書"
+    }
+  ]
+}
