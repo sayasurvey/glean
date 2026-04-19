@@ -22,7 +22,7 @@ interface GeminiRequestBody {
 export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => {
   const requestOrigin = event.headers.origin ?? event.headers.Origin ?? ''
   const allowedOrigin = process.env.ALLOWED_ORIGIN ?? ''
-  const origin = requestOrigin && requestOrigin === allowedOrigin ? requestOrigin : 'null'
+  const origin = requestOrigin === allowedOrigin ? requestOrigin : ''
 
   // OPTIONSプリフライト対応
   if (event.httpMethod === 'OPTIONS') {

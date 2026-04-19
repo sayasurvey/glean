@@ -193,7 +193,7 @@ const extractTitle = (html: string): string => {
 export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => {
   const requestOrigin = event.headers.origin ?? event.headers.Origin ?? ''
   const allowedOrigin = process.env.ALLOWED_ORIGIN ?? ''
-  const origin = requestOrigin && requestOrigin === allowedOrigin ? requestOrigin : 'null'
+  const origin = requestOrigin === allowedOrigin ? requestOrigin : ''
 
   // OPTIONSプリフライト対応
   if (event.httpMethod === 'OPTIONS') {
@@ -222,6 +222,15 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       statusCode: 400,
       headers: corsHeaders(origin),
       body: JSON.stringify({ message: 'url パラメータが必要です' }),
+    }
+  }
+
+  const MAX_URL_LENGTH = 2048
+  if (url.length > MAX_URL_LENGTH) {
+    return {
+      statusCode: 400,
+      headers: corsHeaders(origin),
+      body: JSON.stringify({ message: '無効なURLです' }),
     }
   }
 

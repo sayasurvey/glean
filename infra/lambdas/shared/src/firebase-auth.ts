@@ -77,9 +77,14 @@ export const requireAuth = async (event: APIGatewayProxyEvent): Promise<string> 
 /**
  * CORS レスポンスヘッダーを生成
  */
-export const corsHeaders = (origin: string = '*') => ({
-  'Access-Control-Allow-Origin': origin,
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Content-Type': 'application/json',
-})
+export const corsHeaders = (origin: string) => {
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Content-Type': 'application/json',
+  }
+  if (origin) {
+    headers['Access-Control-Allow-Origin'] = origin
+  }
+  return headers
+}

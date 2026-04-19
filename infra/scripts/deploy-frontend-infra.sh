@@ -17,6 +17,7 @@ set -a; source "$ENV_FILE"; set +a
 
 REGION="ap-northeast-1"
 DOMAIN_NAME="${DOMAIN_NAME:-myglean.jp}"
+WWW_DOMAIN_NAME="www.${DOMAIN_NAME}"
 
 echo -e "${YELLOW}================================${NC}"
 echo -e "${YELLOW}Glean Frontend Infrastructure${NC}"
@@ -71,17 +72,33 @@ for origin in config['Origins']['Items']:
         break
 " 2>/dev/null || echo "")
 
-if [ "$CURRENT_API_DOMAIN" == "$API_DOMAIN" ]; then
-  echo -e "${GREEN}✓ API Gateway origin is already up-to-date: $API_DOMAIN${NC}"
+CURRENT_ALIASES=$(echo "$CONFIG_JSON" | python3 -c "
+import json, sys
+config = json.load(sys.stdin)['DistributionConfig']
+print(' '.join(config.get('Aliases', {}).get('Items', [])))
+" 2>/dev/null || echo "")
+
+WWW_MISSING=true
+if echo "$CURRENT_ALIASES" | grep -q "$WWW_DOMAIN_NAME"; then
+  WWW_MISSING=false
+fi
+
+if [ "$CURRENT_API_DOMAIN" == "$API_DOMAIN" ] && [ "$WWW_MISSING" == "false" ]; then
+  echo -e "${GREEN}✓ API Gateway origin and aliases are already up-to-date${NC}"
   echo -e "\n${GREEN}================================${NC}"
   echo -e "${GREEN}Frontend infrastructure is configured!${NC}"
   echo -e "${GREEN}================================${NC}"
   exit 0
 fi
 
-echo -e "${YELLOW}  Current: ${CURRENT_API_DOMAIN:-'(not set)'}${NC}"
-echo -e "${YELLOW}  New:     $API_DOMAIN${NC}"
-echo -e "${YELLOW}  Updating API Gateway origin...${NC}"
+if [ "$CURRENT_API_DOMAIN" != "$API_DOMAIN" ]; then
+  echo -e "${YELLOW}  API origin current: ${CURRENT_API_DOMAIN:-'(not set)'}${NC}"
+  echo -e "${YELLOW}  API origin new:     $API_DOMAIN${NC}"
+fi
+if [ "$WWW_MISSING" == "true" ]; then
+  echo -e "${YELLOW}  Adding alias: $WWW_DOMAIN_NAME${NC}"
+fi
+echo -e "${YELLOW}  Updating CloudFront distribution...${NC}"
 
 UPDATED_CONFIG=$(echo "$CONFIG_JSON" | python3 -c "
 import json, sys
@@ -90,6 +107,7 @@ data = json.load(sys.stdin)
 config = data['DistributionConfig']
 api_domain = '$API_DOMAIN'
 api_stage = '/$API_STAGE'
+www_domain = '$WWW_DOMAIN_NAME'
 
 # Update ApiGatewayOrigin domain
 for origin in config['Origins']['Items']:
@@ -97,6 +115,12 @@ for origin in config['Origins']['Items']:
         origin['DomainName'] = api_domain
         origin['OriginPath'] = api_stage
         break
+
+# Add www alias if not present
+aliases = config.setdefault('Aliases', {'Quantity': 0, 'Items': []})
+if www_domain not in aliases.get('Items', []):
+    aliases['Items'].append(www_domain)
+    aliases['Quantity'] = len(aliases['Items'])
 
 print(json.dumps(config))
 ")

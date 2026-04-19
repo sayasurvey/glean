@@ -5,6 +5,9 @@ Parameters:
   DomainName:
     Type: String
     Default: "myglean.jp"
+  WwwDomainName:
+    Type: String
+    Default: "www.myglean.jp"
   AcmCertificateArn:
     Type: String
   BackendApiEndpoint:
@@ -62,6 +65,7 @@ Resources:
         DefaultRootObject: index.html
         Aliases:
           - !Ref DomainName
+          - !Ref WwwDomainName
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
