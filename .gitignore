@@ -45,7 +45,12 @@ infra/.env.local
 infra/samconfig.toml
 infra/lambdas/*/dist/
 infra/lambdas/*/node_modules/
+infra/lambdas/*/src/*.js
+infra/lambdas/*/src/*.js.map
+infra/lambdas/*/src/*.d.ts
+infra/lambdas/*/src/*.d.ts.map
 infra/build/
+dist
 
 # AWSの機密情報を含むドキュメント
 CLOUDFRONT_TROUBLESHOOTING.md

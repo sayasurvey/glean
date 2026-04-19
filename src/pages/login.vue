@@ -40,6 +40,5 @@ watch(
       <AuthLoginForm />
     </div>
 
-    <AuthDebug />
   </div>
 </template>
