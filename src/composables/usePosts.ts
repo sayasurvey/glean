@@ -140,15 +140,15 @@ export const usePosts = () => {
       // タグのupsert
       if (tags.length > 0) {
         const batch = writeBatch(db)
-        for (const tag of tags) {
-          const tagRef = doc(db, 'tags', tag)
-          const tagSnap = await getDoc(tagRef)
-          if (tagSnap.exists()) {
-            batch.update(tagRef, { count: increment(1), updatedAt: serverTimestamp() })
+        const tagRefs = tags.map((tag) => doc(db, 'tags', tag))
+        const tagSnaps = await Promise.all(tagRefs.map((ref) => getDoc(ref)))
+        tagSnaps.forEach((snap, i) => {
+          if (snap.exists()) {
+            batch.update(tagRefs[i], { count: increment(1), updatedAt: serverTimestamp() })
           } else {
-            batch.set(tagRef, { name: tag, count: 1, updatedAt: serverTimestamp() })
+            batch.set(tagRefs[i], { name: tags[i], count: 1, updatedAt: serverTimestamp() })
           }
-        }
+        })
         await batch.commit()
       }
 
@@ -174,7 +174,16 @@ export const usePosts = () => {
 
     try {
       const db = useFirebaseDb()
-      await deleteDoc(doc(db, 'posts', postId))
+      const batch = writeBatch(db)
+      batch.delete(doc(db, 'posts', postId))
+
+      if (target.tags?.length > 0) {
+        for (const tag of target.tags) {
+          batch.update(doc(db, 'tags', tag), { count: increment(-1), updatedAt: serverTimestamp() })
+        }
+      }
+
+      await batch.commit()
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? 'unknown'
       error.value = getErrorMessage(code)

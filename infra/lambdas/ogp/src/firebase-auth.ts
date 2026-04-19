@@ -8,12 +8,13 @@ import { getAuth } from 'firebase-admin/auth'
 import type { AuthError } from './types'
 
 let adminInitialized = false
+const ssmClient = new SSMClient({ region: process.env.AWS_REGION || 'ap-northeast-1' })
 
 /**
  * AWS SSM Parameter Store からパラメータを取得
  */
 const getSSMParameter = async (paramName: string): Promise<string> => {
-  const client = new SSMClient({ region: process.env.AWS_REGION || 'ap-northeast-1' })
+  const client = ssmClient
   try {
     const response = await client.send(
       new GetParameterCommand({
@@ -63,12 +64,6 @@ export const requireAuth = async (event: APIGatewayProxyEvent): Promise<string> 
   }
 
   const token = authHeader.slice(7)
-  // デバッグ: トークンの形式確認（先頭10文字のみ）
-  console.log('[Firebase Auth] token info:', {
-    length: token.length,
-    prefix: token.slice(0, 10),
-    isJWT: token.split('.').length === 3,
-  })
   try {
     const decoded = await getAuth().verifyIdToken(token)
     return decoded.uid

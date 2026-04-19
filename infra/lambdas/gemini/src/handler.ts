@@ -3,29 +3,9 @@
  * server/api/gemini.ts から移植
  */
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { requireAuth, corsHeaders } from './firebase-auth'
+import { requireAuth, corsHeaders, getSSMParameter } from './firebase-auth'
 import type { GeminiSummaryData } from './types'
-
-/**
- * AWS SSM Parameter Store からパラメータを取得
- */
-const getSSMParameter = async (paramName: string): Promise<string> => {
-  const client = new SSMClient({ region: process.env.AWS_REGION || 'ap-northeast-1' })
-  try {
-    const response = await client.send(
-      new GetParameterCommand({
-        Name: paramName,
-        WithDecryption: true,
-      })
-    )
-    return response.Parameter?.Value || ''
-  } catch (err) {
-    console.error('[SSM] Parameter retrieval failed:', err)
-    throw new Error(`Failed to retrieve parameter ${paramName}`)
-  }
-}
 
 /**
  * リクエストボディ型
