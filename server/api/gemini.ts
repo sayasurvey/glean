@@ -28,11 +28,19 @@ export default defineEventHandler(async (event) => {
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
 
+    const MAX_URL_LENGTH = 2048
+    const MAX_TEXT_LENGTH = 500
+    const safeUrl = (body.url ?? '').slice(0, MAX_URL_LENGTH)
+    const safeTitle = (body.ogTitle ?? '').slice(0, MAX_TEXT_LENGTH)
+    const safeDescription = (body.ogDescription ?? '').slice(0, MAX_TEXT_LENGTH)
+
     const prompt = `以下の技術記事の情報をもとに、JSONのみを返してください。マークダウンのコードブロックは使わないでください。
 
-URL: ${body.url}
-タイトル: ${body.ogTitle}
-説明: ${body.ogDescription}
+---USER DATA---
+URL: ${safeUrl}
+タイトル: ${safeTitle}
+説明: ${safeDescription}
+---END USER DATA---
 
 返答形式（純粋なJSONのみ）:
 {"summary":"日本語150字以内の簡潔な要約","tags":["AWS","CloudFrontのような具体的な技術名を3〜5個、英語優先で"]}`

@@ -1,3 +1,4 @@
+import { promises as dns } from 'dns'
 import type { OgpData } from '~/types/post'
 import { requireAuth } from '../utils/firebase-admin'
 
@@ -13,7 +14,10 @@ const BLOCKED_RANGES = [
   /^fe80:/i,
 ]
 
-const validateUrl = (urlString: string): void => {
+const isBlockedIp = (ip: string): boolean =>
+  BLOCKED_HOSTNAMES.includes(ip) || BLOCKED_RANGES.some((re) => re.test(ip))
+
+const validateUrl = (urlString: string): URL => {
   const url = new URL(urlString)
 
   if (!['http:', 'https:'].includes(url.protocol)) {
@@ -21,8 +25,20 @@ const validateUrl = (urlString: string): void => {
   }
 
   const hostname = url.hostname.toLowerCase()
-  if (BLOCKED_HOSTNAMES.includes(hostname) || BLOCKED_RANGES.some((re) => re.test(hostname))) {
+  if (isBlockedIp(hostname)) {
     throw createError({ statusCode: 400, statusMessage: '無効なURLです' })
+  }
+
+  return url
+}
+
+const validateResolvedIp = async (hostname: string): Promise<void> => {
+  const [v4, v6] = await Promise.all([
+    dns.resolve4(hostname).catch(() => [] as string[]),
+    dns.resolve6(hostname).catch(() => [] as string[]),
+  ])
+  for (const ip of [...v4, ...v6]) {
+    if (isBlockedIp(ip)) throw createError({ statusCode: 400, statusMessage: '無効なURLです' })
   }
 }
 
@@ -75,7 +91,8 @@ const fetchHtmlWithCookies = async (urlString: string, maxRedirects = 10): Promi
       const location = response.headers.get('location')
       if (!location) break
       currentUrl = new URL(location, currentUrl).href
-      validateUrl(currentUrl)
+      const redirectUrl = validateUrl(currentUrl)
+      await validateResolvedIp(redirectUrl.hostname.toLowerCase())
     } else {
       throw new Error(`HTTP ${response.status}`)
     }
@@ -112,7 +129,11 @@ const decodeHtmlEntities = (str: string): string => {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#(\d+);/g, (_, code) => {
+      const n = Number(code)
+      if (n < 0x20 || n === 0x7f) return ''
+      return String.fromCharCode(n)
+    })
 }
 
 const extractTitle = (html: string): string => {
@@ -133,7 +154,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    validateUrl(url)
+    const parsedUrl = validateUrl(url)
+    await validateResolvedIp(parsedUrl.hostname.toLowerCase())
   } catch (e) {
     if ((e as { statusCode?: number }).statusCode) throw e
     throw createError({ statusCode: 400, statusMessage: '無効なURLです' })

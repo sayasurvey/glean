@@ -27,6 +27,32 @@ if [ ! -f "$ENV_FILE" ]; then
 fi
 set -a; source "$ENV_FILE"; set +a
 
+# 必須環境変数の検証（空のままビルドすると白画面になるため事前に確認）
+MISSING_VARS=()
+REQUIRED_VARS=(
+  "NUXT_PUBLIC_FIREBASE_API_KEY"
+  "NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN"
+  "NUXT_PUBLIC_FIREBASE_PROJECT_ID"
+  "NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
+  "NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
+  "NUXT_PUBLIC_FIREBASE_APP_ID"
+  "S3_BUCKET_NAME"
+)
+for VAR in "${REQUIRED_VARS[@]}"; do
+  if [ -z "${!VAR}" ]; then
+    MISSING_VARS+=("$VAR")
+  fi
+done
+if [ ${#MISSING_VARS[@]} -gt 0 ]; then
+  echo -e "${RED}Error: 以下の必須環境変数が設定されていません:${NC}"
+  for VAR in "${MISSING_VARS[@]}"; do
+    echo -e "${RED}  - $VAR${NC}"
+  done
+  echo -e "${YELLOW}ヒント: .env ファイルに値を設定してください${NC}"
+  exit 1
+fi
+echo -e "${GREEN}✓ 環境変数の検証完了${NC}"
+
 # Configuration
 STACK_NAME="glean"
 REGION="ap-northeast-1"

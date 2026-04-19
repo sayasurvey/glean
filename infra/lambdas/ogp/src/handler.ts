@@ -168,7 +168,11 @@ const decodeHtmlEntities = (str: string): string => {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#(\d+);/g, (_, code) => {
+      const n = Number(code)
+      if (n < 0x20 || n === 0x7f) return ''
+      return String.fromCharCode(n)
+    })
 }
 
 /**
@@ -185,7 +189,9 @@ const extractTitle = (html: string): string => {
  * Lambda Handler
  */
 export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => {
-  const origin = event.headers.origin ?? event.headers.Origin ?? '*'
+  const requestOrigin = event.headers.origin ?? event.headers.Origin ?? ''
+  const allowedOrigin = process.env.ALLOWED_ORIGIN ?? ''
+  const origin = requestOrigin && requestOrigin === allowedOrigin ? requestOrigin : 'null'
 
   // OPTIONSプリフライト対応
   if (event.httpMethod === 'OPTIONS') {
