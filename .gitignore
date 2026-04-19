@@ -30,6 +30,7 @@ firebase-debug.log
 
 # Logs
 *.log
+**/Implementation Logs/
 
 # Test coverage
 coverage/
