@@ -36,11 +36,12 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
   // 認証検証
   try {
     await requireAuth(event)
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const err = e as { statusCode?: number; message?: string }
     return {
-      statusCode: e.statusCode ?? 401,
+      statusCode: err.statusCode ?? 401,
       headers: corsHeaders(origin),
-      body: JSON.stringify({ message: e.message || '認証エラー' }),
+      body: JSON.stringify({ message: err.message || '認証エラー' }),
     }
   }
 

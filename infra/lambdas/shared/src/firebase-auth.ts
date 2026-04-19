@@ -7,16 +7,14 @@ import { getApps, initializeApp, cert } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import type { AuthError } from './types'
 
-let adminInitialized = false
 const ssmClient = new SSMClient({ region: process.env.AWS_REGION || 'ap-northeast-1' })
 
 /**
  * AWS SSM Parameter Store からパラメータを取得
  */
 export const getSSMParameter = async (paramName: string): Promise<string> => {
-  const client = ssmClient
   try {
-    const response = await client.send(
+    const response = await ssmClient.send(
       new GetParameterCommand({
         Name: paramName,
         WithDecryption: true,
@@ -30,10 +28,12 @@ export const getSSMParameter = async (paramName: string): Promise<string> => {
 }
 
 /**
- * Firebase Admin SDK の初期化（初回のみ実行）
+ * Firebase Admin SDK の初期化（並行cold startでも1回だけ実行されるシングルトン）
  */
-const initAdmin = async (): Promise<void> => {
-  if (adminInitialized || getApps().length > 0) return
+let initPromise: Promise<void> | null = null
+
+const _initAdmin = async (): Promise<void> => {
+  if (getApps().length > 0) return
 
   const ssmParamName = process.env.SSM_FIREBASE_SERVICE_ACCOUNT
   if (!ssmParamName) {
@@ -43,11 +43,18 @@ const initAdmin = async (): Promise<void> => {
   try {
     const serviceAccount = await getSSMParameter(ssmParamName)
     initializeApp({ credential: cert(JSON.parse(serviceAccount)) })
-    adminInitialized = true
   } catch (err) {
     console.error('[Firebase] initialization error:', err)
+    initPromise = null
     throw err
   }
+}
+
+const initAdmin = (): Promise<void> => {
+  if (!initPromise) {
+    initPromise = _initAdmin()
+  }
+  return initPromise
 }
 
 /**
@@ -59,8 +66,7 @@ export const requireAuth = async (event: APIGatewayProxyEvent): Promise<string> 
 
   const authHeader = event.headers.authorization ?? event.headers.Authorization
   if (!authHeader?.startsWith('Bearer ')) {
-    const err: AuthError = { statusCode: 401, message: '認証が必要です' }
-    throw err
+    throw { statusCode: 401, message: '認証が必要です' } satisfies AuthError
   }
 
   const token = authHeader.slice(7)
@@ -69,8 +75,7 @@ export const requireAuth = async (event: APIGatewayProxyEvent): Promise<string> 
     return decoded.uid
   } catch (err) {
     console.error('[Firebase Auth] token verification failed:', err)
-    const authErr: AuthError = { statusCode: 401, message: '無効なトークンです' }
-    throw authErr
+    throw { statusCode: 401, message: '無効なトークンです' } satisfies AuthError
   }
 }
 

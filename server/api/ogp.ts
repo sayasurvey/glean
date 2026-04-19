@@ -84,7 +84,9 @@ const fetchHtmlWithCookies = async (urlString: string, maxRedirects = 10): Promi
     }
 
     if (response.status >= 200 && response.status < 300) {
-      return await response.text()
+      const MAX_HTML_CHARS = 2 * 1024 * 1024
+      const text = await response.text()
+      return text.length > MAX_HTML_CHARS ? text.slice(0, MAX_HTML_CHARS) : text
     }
 
     if (response.status >= 300 && response.status < 400) {
