@@ -23,57 +23,257 @@ const handleDelete = (e: Event) => {
     emit('delete', props.post.id)
   }
 }
+
+const domainLabel = computed(() => {
+  try {
+    return new URL(props.post.url).hostname.replace(/^www\./, '')
+  } catch {
+    return props.post.url
+  }
+})
+
+const faviconLetter = computed(() => domainLabel.value[0]?.toUpperCase() ?? '?')
+
+const visibleTags = computed(() => props.post.tags.slice(0, 3))
+const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
 </script>
 
 <template>
-  <div
-    class="group relative flex cursor-pointer flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-    @click="handleCardClick"
-  >
-    <!-- OGP画像 -->
-    <div class="aspect-[2/1] w-full overflow-hidden bg-gray-100">
+  <article class="card group" @click="handleCardClick">
+    <!-- サムネイル -->
+    <div class="thumb">
       <img
         v-if="post.ogpImageUrl"
         :src="post.ogpImageUrl"
         :alt="post.title"
-        class="h-full w-full object-cover"
-        @error="($event.target as HTMLImageElement).style.display = 'none'"
+        loading="lazy"
+        class="thumb-img"
+        @error="($event.target as HTMLImageElement).parentElement!.innerHTML = `<div class='thumb-fallback'><span class='domain-stamp'>${domainLabel.toUpperCase()}</span><div class='ft'>${post.title}</div></div>`"
       />
-      <div v-else class="flex h-full items-center justify-center">
-        <span class="text-3xl text-gray-300">📄</span>
+      <div v-else class="thumb-fallback">
+        <span class="domain-stamp">{{ domainLabel.toUpperCase() }}</span>
+        <div class="ft">{{ post.title }}</div>
       </div>
-    </div>
 
-    <!-- コンテンツ -->
-    <div class="flex flex-col p-4">
-      <h3 class="mb-1 line-clamp-2 text-sm font-semibold text-gray-900">
-        {{ post.title || post.url }}
-      </h3>
-      <p v-if="post.description" class="mb-3 line-clamp-2 text-xs text-gray-500">
-        {{ post.description }}
-      </p>
-
-      <!-- タグ -->
-      <div v-if="post.tags.length > 0" class="mt-auto flex flex-wrap gap-1">
-        <span
-          v-for="tag in post.tags"
-          :key="tag"
-          class="cursor-pointer rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 hover:bg-green-100 hover:text-green-700"
-          @click.stop="emit('tagClick', tag)"
+      <!-- ホバー時のアクションボタン -->
+      <div v-if="isOwner" class="card-actions">
+        <button
+          class="a-btn danger"
+          title="削除"
+          @click.stop="handleDelete"
         >
-          {{ tag }}
-        </span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
       </div>
     </div>
 
-    <!-- 削除ボタン -->
-    <button
-      v-if="isOwner"
-      type="button"
-      class="absolute right-2 top-2 hidden rounded bg-white/80 p-1 text-gray-500 hover:text-red-500 group-hover:block"
-      @click="handleDelete"
-    >
-      🗑
-    </button>
-  </div>
+    <!-- カードボディ -->
+    <div class="card-body">
+      <div class="card-title">{{ post.title || post.url }}</div>
+
+      <p v-if="post.description" class="card-desc">{{ post.description }}</p>
+      <p v-else class="card-desc empty">— 概要なし —</p>
+
+      <div class="card-divider"></div>
+
+      <div class="card-meta">
+        <span class="favicon">{{ faviconLetter }}</span>
+        <span class="domain">{{ domainLabel }}</span>
+      </div>
+
+      <div v-if="post.tags.length > 0" class="card-tags">
+        <span
+          v-for="tag in visibleTags"
+          :key="tag"
+          class="card-tag"
+          @click.stop="emit('tagClick', tag)"
+        >{{ tag }}</span>
+        <span v-if="extraTagCount > 0" class="card-tag more">+{{ extraTagCount }}</span>
+      </div>
+    </div>
+  </article>
 </template>
+
+<style scoped>
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e6ebe6;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--t, 220ms), box-shadow var(--t, 220ms), border-color var(--t, 220ms);
+  will-change: transform;
+  animation: rise 320ms cubic-bezier(.2,.6,.2,1) both;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: #b6d3bf;
+  box-shadow: var(--shadow-hover, 0 4px 10px -2px rgba(20,40,30,.06), 0 8px 24px -6px rgba(20,40,30,.1));
+}
+
+/* サムネイル */
+.thumb {
+  aspect-ratio: 2/1;
+  width: 100%;
+  background: #f3f7f3;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid #eef1ee;
+}
+.thumb-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 600ms cubic-bezier(.2,.6,.2,1);
+}
+.card:hover .thumb-img { transform: scale(1.04); }
+
+.thumb-fallback {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #2d5a3d, #14332a);
+  position: relative;
+}
+.thumb-fallback::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255,255,255,.18), transparent 40%),
+    radial-gradient(circle at 15% 90%, rgba(255,255,255,.08), transparent 50%);
+  pointer-events: none;
+}
+.domain-stamp {
+  position: absolute;
+  top: 14px; left: 16px;
+  font-family: 'Inter', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.5);
+  z-index: 1;
+}
+.ft {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0,0,0,.25);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* アクションボタン */
+.card-actions {
+  position: absolute;
+  top: 10px; right: 10px;
+  display: flex; gap: 4px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: all var(--t, 220ms);
+  z-index: 2;
+}
+.card:hover .card-actions { opacity: 1; transform: translateY(0); }
+.a-btn {
+  width: 30px; height: 30px;
+  border: none;
+  background: rgba(255,255,255,.92);
+  border-radius: 8px;
+  color: #455048;
+  display: grid; place-items: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  transition: all var(--t-fast, 140ms);
+  cursor: pointer;
+}
+.a-btn:hover { background: #fff; color: #1f4a36; transform: scale(1.05); }
+.a-btn.danger:hover { color: #c0392b; }
+
+/* カードボディ */
+.card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.card-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #16221a;
+  letter-spacing: -0.005em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-desc {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #455048;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-desc.empty {
+  color: #a6b0a8;
+  font-style: italic;
+  font-size: 12px;
+}
+.card-divider {
+  height: 1px;
+  background: #eef1ee;
+  margin: 4px -16px 0;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #768279;
+}
+.favicon {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  background: #e8f0e8;
+  display: inline-grid; place-items: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #2d5a3d;
+  flex-shrink: 0;
+}
+.domain { font-weight: 500; color: #455048; }
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: auto;
+}
+.card-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f7f3;
+  color: #1f4a36;
+  border: 1px solid #e8f0e8;
+  transition: all var(--t-fast, 140ms);
+  cursor: pointer;
+  line-height: 1.6;
+}
+.card-tag:hover { background: #e8f0e8; border-color: #b6d3bf; }
+.card-tag.more { background: transparent; color: #768279; border-color: #e6ebe6; }
+</style>

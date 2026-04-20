@@ -64,70 +64,59 @@ const handleSubmit = async () => {
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
     <div>
-      <label for="email" class="block text-sm font-medium text-gray-700">
-        メールアドレス
-      </label>
+      <label for="email" class="mb-1.5 block text-sm font-medium text-ink-2">メールアドレス</label>
       <input
         id="email"
         v-model="email"
         type="email"
         autocomplete="email"
         required
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-        :class="{ 'border-red-500': emailError }"
+        class="block w-full rounded-xl border border-rule px-3.5 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-4 hover:border-brand-300 focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
+        :class="{ 'border-red-400': emailError }"
         @blur="validateEmail(email)"
       />
-      <p v-if="emailError" class="mt-1 text-sm text-red-600">{{ emailError }}</p>
+      <p v-if="emailError" class="mt-1 text-xs text-red-500">{{ emailError }}</p>
     </div>
 
     <div>
-      <label for="password" class="block text-sm font-medium text-gray-700">
-        パスワード（8文字以上）
-      </label>
+      <label for="password" class="mb-1.5 block text-sm font-medium text-ink-2">パスワード（8文字以上）</label>
       <input
         id="password"
         v-model="password"
         type="password"
         autocomplete="new-password"
         required
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-        :class="{ 'border-red-500': passwordError }"
+        class="block w-full rounded-xl border border-rule px-3.5 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-4 hover:border-brand-300 focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
+        :class="{ 'border-red-400': passwordError }"
         @blur="validatePassword(password)"
       />
-      <p v-if="passwordError" class="mt-1 text-sm text-red-600">{{ passwordError }}</p>
+      <p v-if="passwordError" class="mt-1 text-xs text-red-500">{{ passwordError }}</p>
     </div>
 
     <div>
-      <label for="password-confirm" class="block text-sm font-medium text-gray-700">
-        パスワード（確認）
-      </label>
+      <label for="password-confirm" class="mb-1.5 block text-sm font-medium text-ink-2">パスワード（確認）</label>
       <input
         id="password-confirm"
         v-model="passwordConfirm"
         type="password"
         autocomplete="new-password"
         required
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-        :class="{ 'border-red-500': passwordConfirmError }"
+        class="block w-full rounded-xl border border-rule px-3.5 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-4 hover:border-brand-300 focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
+        :class="{ 'border-red-400': passwordConfirmError }"
         @blur="validatePasswordConfirm(passwordConfirm)"
       />
-      <p v-if="passwordConfirmError" class="mt-1 text-sm text-red-600">{{ passwordConfirmError }}</p>
+      <p v-if="passwordConfirmError" class="mt-1 text-xs text-red-500">{{ passwordConfirmError }}</p>
     </div>
 
-    <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+    <p v-if="error" class="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-600">{{ error }}</p>
 
     <button
       type="submit"
       :disabled="isLoading"
-      class="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+      class="w-full rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-brand-800 disabled:opacity-50"
     >
-      <span v-if="isLoading">登録中...</span>
+      <span v-if="isLoading">登録中…</span>
       <span v-else>アカウントを作成</span>
     </button>
-
-    <p class="text-center text-sm">
-      すでにアカウントをお持ちの方は
-      <NuxtLink to="/login" class="text-green-600 hover:underline">ログイン</NuxtLink>
-    </p>
   </form>
 </template>

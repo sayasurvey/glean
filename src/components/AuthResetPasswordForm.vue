@@ -19,42 +19,33 @@ const handleSubmit = async () => {
 
 <template>
   <div>
-    <div v-if="sent" class="rounded-md bg-green-50 p-4">
-      <p class="text-sm text-green-800">
-        メールアドレスが登録されている場合、パスワードリセットメールを送信しました。
-        メールをご確認ください。
+    <div v-if="sent" class="rounded-xl bg-brand-50 p-4">
+      <p class="text-sm text-brand-800">
+        メールアドレスが登録されている場合、パスワードリセットメールを送信しました。メールをご確認ください。
       </p>
     </div>
 
     <form v-else class="space-y-4" @submit.prevent="handleSubmit">
       <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">
-          登録済みメールアドレス
-        </label>
+        <label for="email" class="mb-1.5 block text-sm font-medium text-ink-2">登録済みメールアドレス</label>
         <input
           id="email"
           v-model="email"
           type="email"
           autocomplete="email"
           required
-          class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          class="block w-full rounded-xl border border-rule px-3.5 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-4 hover:border-brand-300 focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
         />
       </div>
 
       <button
         type="submit"
         :disabled="isLoading"
-        class="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+        class="w-full rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-brand-800 disabled:opacity-50"
       >
-        <span v-if="isLoading">送信中...</span>
+        <span v-if="isLoading">送信中…</span>
         <span v-else>リセットメールを送信</span>
       </button>
     </form>
-
-    <div class="mt-4 text-center">
-      <NuxtLink to="/login" class="text-sm text-green-600 hover:underline">
-        ログインに戻る
-      </NuxtLink>
-    </div>
   </div>
 </template>

@@ -18,16 +18,17 @@ const emit = defineEmits<{
 <template>
   <div>
     <!-- スケルトンローダー -->
-    <div v-if="isLoading" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-if="isLoading" class="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
       <div
-        v-for="n in 3"
+        v-for="n in 6"
         :key="n"
-        class="animate-pulse overflow-hidden rounded-lg border border-gray-200 bg-white"
+        class="overflow-hidden rounded-2xl border border-rule bg-white"
       >
-        <div class="h-40 bg-gray-200"></div>
-        <div class="p-4">
-          <div class="mb-2 h-4 rounded bg-gray-200"></div>
-          <div class="h-3 w-3/4 rounded bg-gray-200"></div>
+        <div class="aspect-[2/1] w-full animate-pulse bg-brand-50"></div>
+        <div class="p-4 space-y-3">
+          <div class="h-3.5 w-full animate-pulse rounded-full bg-brand-50"></div>
+          <div class="h-3.5 w-3/4 animate-pulse rounded-full bg-brand-50"></div>
+          <div class="h-3 w-1/2 animate-pulse rounded-full bg-brand-50"></div>
         </div>
       </div>
     </div>
@@ -35,15 +36,19 @@ const emit = defineEmits<{
     <!-- 空状態 -->
     <div
       v-else-if="posts.length === 0"
-      class="flex flex-col items-center py-16 text-center"
+      class="col-span-full flex flex-col items-center py-20 text-center"
     >
-      <span class="mb-3 text-4xl">📚</span>
-      <p class="text-gray-500">まだ記事が登録されていません</p>
-      <p class="mt-1 text-sm text-gray-400">上の「記事を登録」ボタンからURLを追加してください</p>
+      <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+        </svg>
+      </div>
+      <h3 class="mb-1.5 text-base font-semibold text-ink">該当する記事がありません</h3>
+      <p class="text-[13px] text-ink-3">条件を変えるか、検索ワードを短くしてみてください。</p>
     </div>
 
     <!-- 記事グリッド -->
-    <div v-else class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 items-start gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
       <PostTile
         v-for="post in posts"
         :key="post.id"
