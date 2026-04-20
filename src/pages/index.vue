@@ -60,7 +60,7 @@ const handleDeletePost = async (postId: string) => {
 <template>
   <div class="min-h-screen bg-paper">
     <!-- Topbar -->
-    <header class="sticky top-0 z-30 border-b border-rule bg-paper/85 backdrop-blur-md backdrop-saturate-150">
+    <header class="sticky top-0 z-30 border-b border-rule bg-paper">
       <div class="mx-auto flex max-w-[1240px] items-center gap-4 px-7 py-3.5">
         <!-- Brand -->
         <a href="#" class="flex flex-shrink-0 items-center no-underline">
