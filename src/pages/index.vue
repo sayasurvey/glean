@@ -9,8 +9,9 @@ const postsRef = posts as unknown as Ref<import('~/types/post').Post[]>
 const { keyword, filteredPosts: searchFiltered } = useSearch(postsRef)
 
 const showRegistrationForm = ref(false)
-const selectedTag = ref('')
 const sortOrder = ref('新着順')
+const currentPage = ref(1)
+const PAGE_SIZE = 24
 
 watch(
   () => currentUser.value?.uid,
@@ -22,16 +23,8 @@ watch(
 
 onUnmounted(() => stopListening())
 
-const allTags = computed(() => {
-  const tagSet = new Set<string>()
-  posts.value.forEach(p => p.tags.forEach(t => tagSet.add(t)))
-  return Array.from(tagSet).sort()
-})
-
 const filteredPosts = computed(() => {
-  let list = selectedTag.value
-    ? searchFiltered.value.filter(p => p.tags.includes(selectedTag.value))
-    : searchFiltered.value
+  let list = searchFiltered.value
 
   if (sortOrder.value === 'タイトル順') {
     list = [...list].sort((a, b) => a.title.localeCompare(b.title, 'ja'))
@@ -40,6 +33,15 @@ const filteredPosts = computed(() => {
   }
   return list
 })
+
+const totalPages = computed(() => Math.ceil(filteredPosts.value.length / PAGE_SIZE))
+
+const paginatedPosts = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE
+  return filteredPosts.value.slice(start, start + PAGE_SIZE)
+})
+
+watch(filteredPosts, () => { currentPage.value = 1 })
 
 const handleLogout = async () => {
   await logout()
@@ -61,15 +63,8 @@ const handleDeletePost = async (postId: string) => {
     <header class="sticky top-0 z-30 border-b border-rule bg-paper/85 backdrop-blur-md backdrop-saturate-150">
       <div class="mx-auto flex max-w-[1240px] items-center gap-4 px-7 py-3.5">
         <!-- Brand -->
-        <a href="#" class="flex flex-shrink-0 items-center gap-2.5 no-underline">
-          <span class="relative flex h-[30px] w-[30px] items-center justify-center rounded-[9px] shadow-sm" style="background: linear-gradient(135deg, #2d5a3d, #14332a);">
-            <svg width="16" height="16" viewBox="0 0 24 24" class="relative z-10 text-white" fill="currentColor">
-              <path d="M5 19c0-7 6-13 14-13 0 8-6 13-14 13z"/>
-              <path d="M5 19l8-8" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-            </svg>
-            <span class="absolute inset-[4px] rounded-[6px]" style="background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.3), transparent 55%);"></span>
-          </span>
-          <span class="font-inter text-[18px] font-bold tracking-tight text-brand-800">myGlean</span>
+        <a href="#" class="flex flex-shrink-0 items-center no-underline">
+          <img src="~/assets/logo.png" alt="myGlean" class="h-10" />
         </a>
 
         <!-- Search -->
@@ -93,8 +88,8 @@ const handleDeletePost = async (postId: string) => {
           </button>
         </div>
 
-        <!-- Actions -->
-        <div class="flex flex-shrink-0 items-center gap-2">
+        <!-- Actions (右端) -->
+        <div class="ml-auto flex flex-shrink-0 items-center gap-2">
           <span class="hidden text-sm text-ink-3 sm:block">{{ currentUser?.email }}</span>
           <button
             class="flex h-9 w-9 items-center justify-center rounded-[10px] text-ink-2 transition-all hover:bg-brand-50 hover:text-brand-800"
@@ -104,13 +99,6 @@ const handleDeletePost = async (postId: string) => {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
-          </button>
-          <button
-            class="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-brand-800 bg-brand-700 px-4 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-brand-800 active:translate-y-0"
-            @click="showRegistrationForm = true"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-            記事を登録
           </button>
         </div>
       </div>
@@ -133,38 +121,28 @@ const handleDeletePost = async (postId: string) => {
             {{ filteredPosts.length }} 件
           </span>
         </h1>
-        <div class="flex items-center gap-2 text-[13px] text-ink-3">
-          並び替え:
-          <select
-            v-model="sortOrder"
-            class="cursor-pointer appearance-none rounded-lg border border-rule bg-white px-2.5 py-1.5 text-[13px] text-ink outline-none transition-all hover:border-brand-300 focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
-            style="background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27 viewBox=%270 0 10 6%27%3E%3Cpath d=%27M1 1l4 4 4-4%27 stroke=%27%23768279%27 stroke-width=%271.5%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;"
+        <div class="flex items-center gap-3">
+          <button
+            v-if="!showRegistrationForm"
+            class="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-brand-800 bg-brand-700 px-4 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-brand-800 active:translate-y-0"
+            @click="showRegistrationForm = true"
           >
-            <option>新着順</option>
-            <option>古い順</option>
-            <option>タイトル順</option>
-          </select>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            記事を登録
+          </button>
+          <div class="flex items-center gap-2 text-[13px] text-ink-3">
+            並び替え:
+            <select
+              v-model="sortOrder"
+              class="cursor-pointer appearance-none rounded-lg border border-rule bg-white px-2.5 py-1.5 text-[13px] text-ink outline-none transition-all hover:border-brand-300 focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
+              style="background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27 viewBox=%270 0 10 6%27%3E%3Cpath d=%27M1 1l4 4 4-4%27 stroke=%27%23768279%27 stroke-width=%271.5%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;"
+            >
+              <option>新着順</option>
+              <option>古い順</option>
+              <option>タイトル順</option>
+            </select>
+          </div>
         </div>
-      </div>
-
-      <!-- タグフィルター -->
-      <div v-if="allTags.length > 0" class="mb-5 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        <button
-          class="inline-flex h-[30px] flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[12.5px] font-medium transition-all"
-          :class="selectedTag === '' ? 'border-brand-700 bg-brand-700 text-white' : 'border-rule bg-white text-ink-2 hover:border-brand-500 hover:bg-brand-25 hover:text-brand-800'"
-          @click="selectedTag = ''"
-        >
-          <span :class="selectedTag === '' ? 'text-brand-200' : 'text-brand-600'" class="font-semibold">#</span>すべて
-        </button>
-        <button
-          v-for="tag in allTags"
-          :key="tag"
-          class="inline-flex h-[30px] flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[12.5px] font-medium transition-all"
-          :class="selectedTag === tag ? 'border-brand-700 bg-brand-700 text-white' : 'border-rule bg-white text-ink-2 hover:border-brand-500 hover:bg-brand-25 hover:text-brand-800'"
-          @click="selectedTag = selectedTag === tag ? '' : tag"
-        >
-          <span :class="selectedTag === tag ? 'text-brand-200' : 'text-brand-600'" class="font-semibold">#</span>{{ tag }}
-        </button>
       </div>
 
       <!-- エラー -->
@@ -174,11 +152,40 @@ const handleDeletePost = async (postId: string) => {
 
       <!-- 記事一覧 -->
       <PostList
-        :posts="filteredPosts"
+        :posts="paginatedPosts"
         :current-user-id="currentUser?.uid ?? null"
         :is-loading="isLoading"
         @delete-post="handleDeletePost"
       />
+
+      <!-- ページネーション -->
+      <div v-if="totalPages > 1" class="mt-8 flex items-center justify-center gap-1">
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-lg border border-rule bg-white text-ink-2 transition-all hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
+          :disabled="currentPage === 1"
+          @click="currentPage--"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <template v-for="page in totalPages" :key="page">
+          <button
+            class="flex h-9 w-9 items-center justify-center rounded-lg border text-[13px] font-medium transition-all"
+            :class="page === currentPage
+              ? 'border-brand-700 bg-brand-700 text-white'
+              : 'border-rule bg-white text-ink-2 hover:border-brand-300 hover:bg-brand-50'"
+            @click="currentPage = page"
+          >
+            {{ page }}
+          </button>
+        </template>
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-lg border border-rule bg-white text-ink-2 transition-all hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
+          :disabled="currentPage === totalPages"
+          @click="currentPage++"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
 
       <!-- フッター -->
       <footer class="mt-14 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-7 text-[12px] text-ink-3">
@@ -187,8 +194,3 @@ const handleDeletePost = async (postId: string) => {
     </main>
   </div>
 </template>
-
-<style>
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { scrollbar-width: none; }
-</style>
