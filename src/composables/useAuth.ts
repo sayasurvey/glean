@@ -152,6 +152,7 @@ export const useAuth = () => {
     error.value = null
     try {
       await signOut(auth)
+      currentUser.value = null
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? ''
       error.value = getErrorMessage(code)
