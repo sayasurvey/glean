@@ -78,7 +78,7 @@ const handleSubmit = async () => {
       <span v-else>ログイン</span>
     </button>
 
-    <div class="flex items-center justify-between text-sm">
+    <div class="flex justify-center text-sm">
       <NuxtLink to="/reset-password" class="text-brand-700 hover:text-brand-800 hover:underline">
         パスワードを忘れた方
       </NuxtLink>
