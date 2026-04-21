@@ -215,7 +215,13 @@ echo -e "${GREEN}✓ Staging URL: https://$CLOUDFRONT_DOMAIN${NC}"
 # 4. Build Nuxt application
 echo -e "\n${YELLOW}[4/6] Building Nuxt application...${NC}"
 cd "$ROOT_DIR"
-rm -rf .nuxt .output
+
+# 開発サーバーが起動中の場合、ビルドキャッシュが混入して空白ページになるため事前に停止する
+pkill -f "nuxt dev" 2>/dev/null || true
+pkill -f "nuxt/dist/dev" 2>/dev/null || true
+sleep 1
+
+rm -rf .nuxt .output node_modules/.cache
 export NUXT_PUBLIC_API_BASE="$API_ENDPOINT"
 NODE_ENV=production npm run generate
 
