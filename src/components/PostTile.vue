@@ -34,6 +34,8 @@ const domainLabel = computed(() => {
 
 const faviconLetter = computed(() => domainLabel.value[0]?.toUpperCase() ?? '?')
 
+const imgError = ref(false)
+
 const visibleTags = computed(() => props.post.tags.slice(0, 3))
 const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
 </script>
@@ -43,12 +45,12 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
     <!-- サムネイル -->
     <div class="thumb">
       <img
-        v-if="post.ogpImageUrl"
+        v-if="post.ogpImageUrl && !imgError"
         :src="post.ogpImageUrl"
         :alt="post.title"
         loading="lazy"
         class="thumb-img"
-        @error="($event.target as HTMLImageElement).parentElement!.innerHTML = `<div class='thumb-fallback'><span class='domain-stamp'>${domainLabel.toUpperCase()}</span><div class='ft'>${post.title}</div></div>`"
+        @error="imgError = true"
       />
       <div v-else class="thumb-fallback">
         <span class="domain-stamp">{{ domainLabel.toUpperCase() }}</span>
