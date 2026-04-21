@@ -48,6 +48,38 @@
 | `npm run lint` | ESLint実行 |
 | `npm run build` | 本番ビルド |
 
+## トラブルシューティング
+
+### デプロイ後に画面が真っ白になる
+
+**原因**: `npm run dev`（開発サーバー）が起動中のまま `nuxt generate` を実行すると、
+devモードの `.nuxt` キャッシュがビルドに混入し、HTMLが `@vite/client` や
+`/_nuxt/Users/yona/glean/node_modules/...` などの開発専用パスを参照してしまう。
+
+**確認方法**:
+```bash
+# CloudFrontのHTMLにdevパスが含まれているか確認
+curl -s https://<CloudFront URL>/ | grep -o 'src="/_nuxt/[^"]*"'
+# → ハッシュ付きファイル名（例: t9NwAA9h.js）ならOK
+# → @vite/client や絶対パス（/Users/...）なら問題あり
+```
+
+**対処法**:
+```bash
+# 1. devサーバーを停止
+pkill -f "nuxt dev"
+
+# 2. キャッシュを完全クリア
+rm -rf .nuxt .output node_modules/.cache
+
+# 3. 再デプロイ
+bash infra/scripts/deploy-frontend-staging.sh  # ステージング
+bash infra/scripts/deploy-frontend.sh           # 本番
+```
+
+デプロイスクリプトはこの対処を自動で行うよう修正済みだが、
+スクリプト外で手動ビルドする場合は上記の手順を実施すること。
+
 ## GitHubのPRのテンプレート
 ### 概要
 <!-- PRの背景・目的・概要 -->
