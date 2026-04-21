@@ -10,8 +10,8 @@ Globals:
     MemorySize: 256
     Environment:
       Variables:
-        SSM_FIREBASE_SERVICE_ACCOUNT: /glean/firebase-service-account
-        SSM_GEMINI_API_KEY: /glean/gemini-api-key
+        SSM_FIREBASE_SERVICE_ACCOUNT: !Sub "/glean-${Environment}/firebase-service-account"
+        SSM_GEMINI_API_KEY: !Sub "/glean-${Environment}/gemini-api-key"
     Layers:
       - !Ref SharedDepsLayer
 
@@ -20,12 +20,17 @@ Parameters:
     Type: String
     Description: Allowed origin for CORS and Lambda ALLOWED_ORIGIN env var
     Default: "https://www.myglean.jp"
+  Environment:
+    Type: String
+    Description: Deployment environment (prod or staging)
+    Default: "prod"
+    AllowedValues: ["prod", "staging"]
 
 Resources:
   SharedDepsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: glean-shared-deps
+      LayerName: !Sub "glean-shared-deps-${Environment}"
       ContentUri: lambdas/shared/
       CompatibleRuntimes: [nodejs22.x]
       CompatibleArchitectures: [arm64]
@@ -36,13 +41,13 @@ Resources:
   OgpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: glean-ogp
+      FunctionName: !Sub "glean-ogp-${Environment}"
       CodeUri: lambdas/
       Handler: ogp/src/handler.handler
       Description: OGP data fetcher with Firebase auth
       Policies:
         - SSMParameterReadPolicy:
-            ParameterName: glean/*
+            ParameterName: !Sub "glean-${Environment}/*"
       Environment:
         Variables:
           ALLOWED_ORIGIN: !Ref AllowedOrigin
@@ -70,13 +75,13 @@ Resources:
   GeminiFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: glean-gemini
+      FunctionName: !Sub "glean-gemini-${Environment}"
       CodeUri: lambdas/
       Handler: gemini/src/handler.handler
       Description: Gemini summary generator with Firebase auth
       Policies:
         - SSMParameterReadPolicy:
-            ParameterName: glean/*
+            ParameterName: !Sub "glean-${Environment}/*"
       Environment:
         Variables:
           ALLOWED_ORIGIN: !Ref AllowedOrigin
@@ -104,8 +109,8 @@ Resources:
   GleanApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: glean-api
-      StageName: prod
+      Name: !Sub "glean-api-${Environment}"
+      StageName: !Ref Environment
       EndpointConfiguration: REGIONAL
       Cors:
         AllowMethods: "'GET,POST,OPTIONS'"
@@ -119,7 +124,7 @@ Resources:
 
 Outputs:
   ApiEndpoint:
-    Value: !Sub https://${GleanApi}.execute-api.${AWS::Region}.amazonaws.com/prod
+    Value: !Sub "https://${GleanApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
     Description: API Gateway endpoint
     Export:
       Name: !Sub ${AWS::StackName}-ApiEndpoint

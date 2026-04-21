@@ -89,7 +89,7 @@ cd "$(dirname "$0")/../../"
 echo -e "  Cleaning build cache..."
 rm -rf .nuxt .output
 export NUXT_PUBLIC_API_BASE="$API_ENDPOINT"
-npm run generate
+NODE_ENV=production npm run generate
 
 if [ ! -d ".output/public" ]; then
   echo -e "${RED}Error: Nuxt build failed or output directory not found${NC}"
