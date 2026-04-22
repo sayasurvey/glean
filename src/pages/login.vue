@@ -45,6 +45,12 @@ watch(
           <NuxtLink to="/signup" class="font-medium text-brand-700 hover:text-brand-800 hover:underline">新規登録</NuxtLink>
         </p>
       </div>
+
+      <p class="mt-6 text-center text-xs text-ink-4">
+        <NuxtLink to="/terms" class="hover:text-ink-2 hover:underline transition-colors">利用規約</NuxtLink>
+        <span class="mx-2 text-rule">|</span>
+        <NuxtLink to="/privacy-policy" class="hover:text-ink-2 hover:underline transition-colors">プライバシーポリシー</NuxtLink>
+      </p>
     </div>
   </div>
 </template>
