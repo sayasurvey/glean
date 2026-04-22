@@ -50,6 +50,14 @@ const handleGoogleSuccess = async () => {
             既にアカウントをお持ちの方は
             <NuxtLink to="/login" class="font-medium text-brand-700 hover:text-brand-800 hover:underline">ログイン</NuxtLink>
           </p>
+
+          <p class="mt-4 text-center text-xs text-ink-4">
+            登録することで
+            <NuxtLink to="/terms" class="hover:text-ink-2 hover:underline transition-colors">利用規約</NuxtLink>
+            および
+            <NuxtLink to="/privacy-policy" class="hover:text-ink-2 hover:underline transition-colors">プライバシーポリシー</NuxtLink>
+            に同意したものとみなします。
+          </p>
         </template>
       </div>
     </div>
