@@ -6,7 +6,10 @@ export default defineNuxtConfig({
   ssr: false,
   srcDir: 'src/',
   serverDir: './server',
-  modules: [['@nuxtjs/tailwindcss', { cssPath: '~/assets/styles.css' }]],
+  modules: [['@nuxtjs/tailwindcss', { cssPath: '~/assets/styles.css' }], 'nuxt-gtag'],
+  gtag: {
+    id: process.env.NUXT_PUBLIC_GTAG_ID,
+  },
   runtimeConfig: {
     public: {
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY,
