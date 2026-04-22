@@ -3,9 +3,6 @@ import { useAuth } from '~/composables/useAuth'
 
 const { isAuthenticated, isLoading, error } = useAuth()
 
-// isLoading が false かつ isAuthenticated が true になった瞬間に遷移する
-// immediate: true により、マウント時点で既にログイン済みの場合もカバー
-// onAuthStateChanged の確認後に遷移するため、ミドルウェアとの競合を防ぐ
 watch(
   [isLoading, isAuthenticated],
   ([loading, authenticated]) => {
@@ -18,27 +15,36 @@ watch(
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-    <div class="w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow">
-      <div class="text-center">
-        <h1 class="text-2xl font-bold text-gray-900">ログイン</h1>
+  <div class="flex min-h-screen items-center justify-center bg-paper px-4 py-12">
+    <div class="w-full max-w-md">
+      <!-- ブランドロゴ -->
+      <div class="mb-8 flex justify-center">
+        <img src="~/assets/logo.png" alt="myGlean" class="h-10" />
       </div>
 
-      <p v-if="error" class="rounded bg-red-50 p-3 text-sm text-red-700">{{ error }}</p>
+      <div class="rounded-2xl border border-rule bg-white p-8 shadow-[var(--shadow-hover)]">
+        <h1 class="mb-6 text-center text-xl font-bold text-ink">ログイン</h1>
 
-      <AuthGoogleButton />
+        <p v-if="error" class="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{{ error }}</p>
 
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300" />
+        <AuthGoogleButton />
+
+        <div class="relative my-5">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-rule" />
+          </div>
+          <div class="relative flex justify-center text-xs">
+            <span class="bg-white px-3 text-ink-3">または</span>
+          </div>
         </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="bg-white px-2 text-gray-500">または</span>
-        </div>
+
+        <AuthLoginForm />
+
+        <p class="mt-5 text-center text-sm text-ink-3">
+          アカウントをお持ちでない方は
+          <NuxtLink to="/signup" class="font-medium text-brand-700 hover:text-brand-800 hover:underline">新規登録</NuxtLink>
+        </p>
       </div>
-
-      <AuthLoginForm />
     </div>
-
   </div>
 </template>

@@ -86,10 +86,16 @@ echo "  S3 Bucket: $BUCKET_NAME"
 # 2. Build Nuxt application
 echo -e "\n${YELLOW}[2/4] Building Nuxt application...${NC}"
 cd "$(dirname "$0")/../../"
+
+# 開発サーバーが起動中の場合、ビルドキャッシュが混入して空白ページになるため事前に停止する
+pkill -f "nuxt dev" 2>/dev/null || true
+pkill -f "nuxt/dist/dev" 2>/dev/null || true
+sleep 1
+
 echo -e "  Cleaning build cache..."
-rm -rf .nuxt .output
+rm -rf .nuxt .output node_modules/.cache
 export NUXT_PUBLIC_API_BASE="$API_ENDPOINT"
-npm run generate
+NODE_ENV=production npm run generate
 
 if [ ! -d ".output/public" ]; then
   echo -e "${RED}Error: Nuxt build failed or output directory not found${NC}"

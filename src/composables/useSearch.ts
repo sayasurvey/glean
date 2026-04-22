@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
-import type { Ref } from 'vue'
+import type { DeepReadonly, Ref } from 'vue'
 import type { Post } from '~/types/post'
 
-export const useSearch = (posts: Readonly<Ref<Post[]>>) => {
+export const useSearch = (posts: DeepReadonly<Ref<Post[]>>) => {
   const keyword = ref('')
 
   const filteredPosts = computed(() => {

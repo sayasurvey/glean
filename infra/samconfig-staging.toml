@@ -1,0 +1,19 @@
+version = 0.1
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "glean-staging"
+s3_prefix = "glean-staging"
+region = "ap-northeast-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = [
+  "AllowedOrigin=*",
+  "Environment=staging"
+]
+
+[default.build]
+[default.build.parameters]
+cached = true
+parallel = true

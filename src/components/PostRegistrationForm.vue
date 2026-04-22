@@ -98,19 +98,30 @@ const handleBack = () => {
 </script>
 
 <template>
-  <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-    <h2 class="mb-4 text-lg font-semibold text-gray-900">記事を登録</h2>
+  <div class="rounded-2xl border border-rule bg-white p-6 shadow-[var(--shadow-hover)]">
+    <div class="mb-5 flex items-center justify-between">
+      <h2 class="text-base font-bold text-ink">記事を登録</h2>
+      <button
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-brand-50 hover:text-ink"
+        @click="emit('cancel')"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </div>
 
-    <!-- Step 1: URL入力 -->
+    <!-- URL入力 -->
     <div v-if="step === 'input'">
       <div class="mb-4">
-        <label class="mb-1 block text-sm font-medium text-gray-700">URL</label>
+        <label class="mb-1.5 block text-sm font-medium text-ink-2">URL</label>
         <input
           v-model="url"
           type="url"
           placeholder="https://example.com/article"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-          :class="{ 'border-red-500': urlError }"
+          class="w-full rounded-xl border border-rule px-3.5 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-4 hover:border-brand-300 focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
+          :class="{ 'border-red-400': urlError }"
           @keydown.enter="handleConfirm"
         />
         <p v-if="urlError" class="mt-1 text-xs text-red-500">{{ urlError }}</p>
@@ -118,14 +129,14 @@ const handleBack = () => {
       <div class="flex justify-end gap-2">
         <button
           type="button"
-          class="rounded-md px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+          class="rounded-xl px-4 py-2 text-sm font-medium text-ink-2 transition-colors hover:bg-brand-50"
           @click="emit('cancel')"
         >
           キャンセル
         </button>
         <button
           type="button"
-          class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          class="inline-flex items-center gap-1.5 rounded-xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-800"
           @click="handleConfirm"
         >
           確認
@@ -133,60 +144,62 @@ const handleBack = () => {
       </div>
     </div>
 
-    <!-- Step 2: ローディング -->
-    <div v-else-if="step === 'loading'" class="flex flex-col items-center py-8">
-      <div class="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
-      <p class="mt-3 text-sm text-gray-500">記事情報を取得中...</p>
+    <!-- ローディング -->
+    <div v-else-if="step === 'loading'" class="flex flex-col items-center py-10">
+      <div class="h-9 w-9 animate-spin rounded-full border-[3px] border-brand-100 border-t-brand-700"></div>
+      <p class="mt-3 text-sm text-ink-3">記事情報を取得中…</p>
     </div>
 
-    <!-- Step 3: プレビュー -->
+    <!-- プレビュー -->
     <div v-else-if="step === 'preview'">
-      <p v-if="ogpWarning" class="mb-3 rounded bg-yellow-50 px-3 py-2 text-sm text-yellow-700">
+      <p v-if="ogpWarning" class="mb-3 rounded-xl bg-amber-50 px-3.5 py-2.5 text-sm text-amber-700">
         {{ ogpWarning }}
       </p>
 
-      <div class="mb-4 rounded-md border border-gray-200 p-3">
+      <div class="mb-4 overflow-hidden rounded-xl border border-rule">
         <img
           v-if="ogpData.imageUrl"
           :src="ogpData.imageUrl"
           alt="OGP画像"
-          class="mb-2 mx-auto block max-h-[30vh] w-auto rounded object-contain"
+          class="block max-h-[28vh] w-full object-cover"
         />
-        <div v-else class="mb-2 flex h-20 items-center justify-center rounded bg-gray-100">
-          <span class="text-sm text-gray-400">画像なし</span>
+        <div v-else class="flex h-24 items-center justify-center bg-brand-50">
+          <span class="text-sm text-ink-4">画像なし</span>
         </div>
-        <div class="mb-2">
-          <label class="mb-1 block text-xs font-medium text-gray-500">タイトル</label>
-          <input
-            v-model="ogpData.title"
-            type="text"
-            class="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-green-500 focus:outline-none"
-          />
-        </div>
-        <div v-if="summary" class="mb-1">
-          <label class="mb-1 block text-xs font-medium text-gray-500">概要（AI生成）</label>
-          <p class="text-sm text-gray-700">{{ summary }}</p>
+        <div class="p-3.5 space-y-3">
+          <div>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-3">タイトル</label>
+            <input
+              v-model="ogpData.title"
+              type="text"
+              class="w-full rounded-lg border border-rule px-3 py-1.5 text-sm text-ink outline-none focus:border-brand-600 focus:shadow-[0_0_0_3px_rgba(45,90,61,.12)]"
+            />
+          </div>
+          <div v-if="summary">
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-3">概要（AI生成）</label>
+            <p class="text-sm leading-relaxed text-ink-2">{{ summary }}</p>
+          </div>
         </div>
       </div>
 
       <div class="mb-4">
-        <label class="mb-1 block text-sm font-medium text-gray-700">タグ</label>
+        <label class="mb-1.5 block text-sm font-medium text-ink-2">タグ</label>
         <TagInput v-model="tags" />
       </div>
 
-      <p v-if="error" class="mb-3 text-sm text-red-500">{{ error }}</p>
+      <p v-if="error" class="mb-3 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-600">{{ error }}</p>
 
       <div class="flex justify-end gap-2">
         <button
           type="button"
-          class="rounded-md px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+          class="rounded-xl px-4 py-2 text-sm font-medium text-ink-2 transition-colors hover:bg-brand-50"
           @click="handleBack"
         >
           戻る
         </button>
         <button
           type="button"
-          class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          class="inline-flex items-center gap-1.5 rounded-xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-800"
           @click="handleRegister"
         >
           登録

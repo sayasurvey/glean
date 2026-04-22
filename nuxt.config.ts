@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   ssr: false,
   srcDir: 'src/',
   serverDir: './server',
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: [['@nuxtjs/tailwindcss', { cssPath: '~/assets/styles.css' }]],
   runtimeConfig: {
     public: {
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY,
@@ -31,6 +31,9 @@ export default defineNuxtConfig({
     head: {
       link: [
         { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Inter:wght@500;600;700&display=swap' },
       ],
       meta: [
         { property: 'og:title', content: 'myGlean' },
