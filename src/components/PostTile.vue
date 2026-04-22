@@ -41,26 +41,32 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
 </script>
 
 <template>
-  <article class="card group" @click="handleCardClick">
+  <article
+    class="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-rule bg-white will-change-transform animate-[rise_320ms_cubic-bezier(.2,.6,.2,1)_both] transition-[transform,box-shadow,border-color] duration-[220ms] ease-[cubic-bezier(.2,.6,.2,1)] hover:-translate-y-[3px] hover:border-brand-300 hover:shadow-[var(--shadow-hover)]"
+    @click="handleCardClick"
+  >
     <!-- サムネイル -->
-    <div class="thumb">
+    <div class="relative aspect-[2/1] w-full overflow-hidden border-b border-rule-2 bg-brand-50">
       <img
         v-if="post.ogpImageUrl && !imgError"
         :src="post.ogpImageUrl"
         :alt="post.title"
         loading="lazy"
-        class="thumb-img"
+        class="block h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(.2,.6,.2,1)] group-hover:scale-[1.04]"
         @error="imgError = true"
       />
-      <div v-else class="thumb-fallback">
-        <span class="domain-stamp">{{ domainLabel.toUpperCase() }}</span>
-        <div class="ft">{{ post.title }}</div>
+      <div v-else class="thumb-fallback relative flex h-full w-full items-end bg-gradient-to-br from-brand-700 to-brand-900 px-[18px] py-4 text-white">
+        <span class="absolute left-4 top-[14px] z-[1] font-inter text-[10px] tracking-[.08em] text-white/50">{{ domainLabel.toUpperCase() }}</span>
+        <div class="relative z-[1] line-clamp-3 text-[15px] font-bold leading-[1.4] [text-shadow:0_1px_2px_rgba(0,0,0,.25)]">{{ post.title }}</div>
       </div>
 
       <!-- ホバー時のアクションボタン -->
-      <div v-if="isOwner" class="card-actions">
+      <div
+        v-if="isOwner"
+        class="absolute right-[10px] top-[10px] z-[2] flex -translate-y-1 gap-1 opacity-0 transition-all duration-[220ms] ease-[cubic-bezier(.2,.6,.2,1)] group-hover:translate-y-0 group-hover:opacity-100"
+      >
         <button
-          class="a-btn danger"
+          class="grid h-[30px] w-[30px] cursor-pointer place-items-center rounded-lg border-none bg-white/[.92] text-ink-2 shadow-[0_1px_3px_rgba(0,0,0,.1)] backdrop-blur-[4px] transition-all duration-[140ms] hover:scale-105 hover:bg-white hover:text-[#c0392b]"
           title="削除"
           @click.stop="handleDelete"
         >
@@ -73,78 +79,35 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
     </div>
 
     <!-- カードボディ -->
-    <div class="card-body">
-      <div class="card-title">{{ post.title || post.url }}</div>
+    <div class="flex flex-1 flex-col gap-[10px] px-4 pb-4 pt-[14px]">
+      <div class="line-clamp-2 text-[14.5px] font-bold leading-[1.5] tracking-[-0.005em] text-ink">{{ post.title || post.url }}</div>
 
-      <p v-if="post.description" class="card-desc">{{ post.description }}</p>
-      <p v-else class="card-desc empty">— 概要なし —</p>
+      <p
+        class="line-clamp-3 text-[12.5px] leading-[1.65]"
+        :class="post.description ? 'text-ink-2' : 'text-[12px] italic text-ink-4'"
+      >{{ post.description || '— 概要なし —' }}</p>
 
-      <div class="card-divider"></div>
+      <div class="mt-1 h-px -mx-4 bg-rule-2"></div>
 
-      <div class="card-meta">
-        <span class="favicon">{{ faviconLetter }}</span>
-        <span class="domain">{{ domainLabel }}</span>
+      <div class="flex items-center gap-2 text-[11.5px] text-ink-3">
+        <span class="inline-grid h-[14px] w-[14px] shrink-0 place-items-center rounded-[3px] bg-brand-100 font-inter text-[9px] font-bold text-brand-700">{{ faviconLetter }}</span>
+        <span class="font-medium text-ink-2">{{ domainLabel }}</span>
       </div>
 
-      <div v-if="post.tags.length > 0" class="card-tags">
+      <div v-if="post.tags.length > 0" class="mt-auto flex flex-wrap gap-[5px]">
         <span
           v-for="tag in visibleTags"
           :key="tag"
-          class="card-tag"
+          class="cursor-pointer rounded-full border border-brand-100 bg-brand-50 px-2 py-[2px] text-[11px] font-medium leading-[1.6] text-brand-800 transition-all duration-[140ms] hover:border-brand-300 hover:bg-brand-100"
           @click.stop="emit('tagClick', tag)"
         >{{ tag }}</span>
-        <span v-if="extraTagCount > 0" class="card-tag more">+{{ extraTagCount }}</span>
+        <span v-if="extraTagCount > 0" class="rounded-full border border-rule bg-transparent px-2 py-[2px] text-[11px] font-medium leading-[1.6] text-ink-3">+{{ extraTagCount }}</span>
       </div>
     </div>
   </article>
 </template>
 
 <style scoped>
-.card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border: 1px solid var(--color-rule);
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform var(--t, 220ms), box-shadow var(--t, 220ms), border-color var(--t, 220ms);
-  will-change: transform;
-  animation: rise 320ms cubic-bezier(.2,.6,.2,1) both;
-}
-.card:hover {
-  transform: translateY(-3px);
-  border-color: var(--color-brand-300);
-  box-shadow: var(--shadow-hover);
-}
-
-/* サムネイル */
-.thumb {
-  aspect-ratio: 2/1;
-  width: 100%;
-  background: var(--color-brand-50);
-  overflow: hidden;
-  position: relative;
-  border-bottom: 1px solid var(--color-rule-2);
-}
-.thumb-img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 600ms cubic-bezier(.2,.6,.2,1);
-}
-.card:hover .thumb-img { transform: scale(1.04); }
-
-.thumb-fallback {
-  width: 100%; height: 100%;
-  display: flex;
-  align-items: flex-end;
-  padding: 16px 18px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--color-brand-700), var(--color-brand-900));
-  position: relative;
-}
 .thumb-fallback::before {
   content: "";
   position: absolute; inset: 0;
@@ -153,129 +116,4 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
     radial-gradient(circle at 15% 90%, rgba(255,255,255,.08), transparent 50%);
   pointer-events: none;
 }
-.domain-stamp {
-  position: absolute;
-  top: 14px; left: 16px;
-  font-family: 'Inter', monospace;
-  font-size: 10px;
-  letter-spacing: .08em;
-  color: rgba(255,255,255,.5);
-  z-index: 1;
-}
-.ft {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.4;
-  text-shadow: 0 1px 2px rgba(0,0,0,.25);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
-}
-
-/* アクションボタン */
-.card-actions {
-  position: absolute;
-  top: 10px; right: 10px;
-  display: flex; gap: 4px;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: all var(--t, 220ms);
-  z-index: 2;
-}
-.card:hover .card-actions { opacity: 1; transform: translateY(0); }
-.a-btn {
-  width: 30px; height: 30px;
-  border: none;
-  background: rgba(255,255,255,.92);
-  border-radius: 8px;
-  color: var(--color-ink-2);
-  display: grid; place-items: center;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 1px 3px rgba(0,0,0,.1);
-  transition: all var(--t-fast, 140ms);
-  cursor: pointer;
-}
-.a-btn:hover { background: #fff; color: var(--color-brand-800); transform: scale(1.05); }
-.a-btn.danger:hover { color: #c0392b; }
-
-/* カードボディ */
-.card-body {
-  padding: 14px 16px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-}
-.card-title {
-  font-size: 14.5px;
-  font-weight: 700;
-  line-height: 1.5;
-  color: var(--color-ink);
-  letter-spacing: -0.005em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.card-desc {
-  font-size: 12.5px;
-  line-height: 1.65;
-  color: var(--color-ink-2);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.card-desc.empty {
-  color: var(--color-ink-4);
-  font-style: italic;
-  font-size: 12px;
-}
-.card-divider {
-  height: 1px;
-  background: var(--color-rule-2);
-  margin: 4px -16px 0;
-}
-.card-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11.5px;
-  color: var(--color-ink-3);
-}
-.favicon {
-  width: 14px; height: 14px;
-  border-radius: 3px;
-  background: var(--color-brand-100);
-  display: inline-grid; place-items: center;
-  font-family: 'Inter', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--color-brand-700);
-  flex-shrink: 0;
-}
-.domain { font-weight: 500; color: var(--color-ink-2); }
-.card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: auto;
-}
-.card-tag {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--color-brand-50);
-  color: var(--color-brand-800);
-  border: 1px solid var(--color-brand-100);
-  transition: all var(--t-fast, 140ms);
-  cursor: pointer;
-  line-height: 1.6;
-}
-.card-tag:hover { background: var(--color-brand-100); border-color: var(--color-brand-300); }
-.card-tag.more { background: transparent; color: var(--color-ink-3); border-color: var(--color-rule); }
 </style>

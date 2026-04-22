@@ -9,6 +9,8 @@
   --color-brand-100: #e8f0e8;
   --color-brand-200: #d3e4d8;
   --color-brand-300: #b6d3bf;
+  --color-brand-500: #5a9072;
+  --color-brand-600: #3f7553;
   --color-brand-700: #2d5a3d;
   --color-brand-800: #1f4a36;
   --color-brand-900: #14332a;
@@ -17,6 +19,8 @@
   --color-ink-2: #455048;
   --color-ink-3: #768279;
   --color-ink-4: #a6b0a8;
+  /* surface */
+  --color-paper:  #fafaf7;
   /* rule */
   --color-rule:   #e6ebe6;
   --color-rule-2: #eef1ee;

@@ -56,6 +56,11 @@ const paginationPages = computed<(number | '...')[]>(() => {
 
 watch(filteredPosts, () => { currentPage.value = 1 })
 
+const goToPage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 const handleLogout = async () => {
   await logout()
   await navigateTo('/login')
@@ -168,6 +173,7 @@ const handleDeletePost = async (postId: string) => {
         :posts="paginatedPosts"
         :current-user-id="currentUser?.uid ?? null"
         :is-loading="isLoading"
+        :is-filtering="keyword.trim().length > 0"
         @delete-post="handleDeletePost"
       />
 
@@ -176,7 +182,7 @@ const handleDeletePost = async (postId: string) => {
         <button
           class="flex h-9 w-9 items-center justify-center rounded-lg border border-rule bg-white text-ink-2 transition-all hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
           :disabled="currentPage === 1"
-          @click="currentPage--"
+          @click="goToPage(currentPage - 1)"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
@@ -191,7 +197,7 @@ const handleDeletePost = async (postId: string) => {
             :class="page === currentPage
               ? 'border-brand-700 bg-brand-700 text-white'
               : 'border-rule bg-white text-ink-2 hover:border-brand-300 hover:bg-brand-50'"
-            @click="currentPage = page"
+            @click="goToPage(page as number)"
           >
             {{ page }}
           </button>
@@ -199,7 +205,7 @@ const handleDeletePost = async (postId: string) => {
         <button
           class="flex h-9 w-9 items-center justify-center rounded-lg border border-rule bg-white text-ink-2 transition-all hover:border-brand-300 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
           :disabled="currentPage === totalPages"
-          @click="currentPage++"
+          @click="goToPage(currentPage + 1)"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </button>

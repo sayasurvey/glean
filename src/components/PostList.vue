@@ -5,6 +5,7 @@ interface Props {
   posts: Post[]
   currentUserId: string | null
   isLoading: boolean
+  isFiltering: boolean
 }
 
 const props = defineProps<Props>()
@@ -33,9 +34,9 @@ const emit = defineEmits<{
       </div>
     </div>
 
-    <!-- 空状態 -->
+    <!-- 空状態: 検索結果なし -->
     <div
-      v-else-if="posts.length === 0"
+      v-else-if="posts.length === 0 && isFiltering"
       class="col-span-full flex flex-col items-center py-20 text-center"
     >
       <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
@@ -45,6 +46,20 @@ const emit = defineEmits<{
       </div>
       <h3 class="mb-1.5 text-base font-semibold text-ink">該当する記事がありません</h3>
       <p class="text-[13px] text-ink-3">条件を変えるか、検索ワードを短くしてみてください。</p>
+    </div>
+
+    <!-- 空状態: 記事未登録 -->
+    <div
+      v-else-if="posts.length === 0"
+      class="col-span-full flex flex-col items-center py-20 text-center"
+    >
+      <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/>
+        </svg>
+      </div>
+      <h3 class="mb-1.5 text-base font-semibold text-ink">まだ記事が登録されていません</h3>
+      <p class="text-[13px] text-ink-3">上の「記事を登録」ボタンからURLを追加してください。</p>
     </div>
 
     <!-- 記事グリッド -->
