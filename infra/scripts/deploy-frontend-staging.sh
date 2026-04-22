@@ -8,15 +8,30 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+INFRA_DIR="$(dirname "$SCRIPT_DIR")"
 ROOT_DIR="$SCRIPT_DIR/../../"
 REGION="ap-northeast-1"
 BACKEND_STACK_NAME="glean-staging"
-ACCOUNT_ID="827251793719"
-BUCKET_NAME="glean-frontend-staging-${ACCOUNT_ID}"
-# 既存の OAC を再利用（glean-frontend-827251793719 と共用）
-OAC_ID="EWTFT9UNYWEX6"
 # CloudFront Distribution ID の保存先 SSM パラメータ
 SSM_DIST_ID="/glean-staging/cloudfront-distribution-id"
+
+# .env.staging を読み込む（OAC IDなどステージング固有の設定）
+STAGING_ENV_FILE="$INFRA_DIR/.env.staging"
+if [ ! -f "$STAGING_ENV_FILE" ]; then
+  echo -e "${RED}Error: $STAGING_ENV_FILE not found. Copy .env.staging.example to .env.staging and fill in the values.${NC}"
+  exit 1
+fi
+set -a; source "$STAGING_ENV_FILE"; set +a
+
+if [ -z "$CLOUDFRONT_OAC_ID" ]; then
+  echo -e "${RED}Error: CLOUDFRONT_OAC_ID が設定されていません。infra/.env.staging を確認してください。${NC}"
+  exit 1
+fi
+OAC_ID="$CLOUDFRONT_OAC_ID"
+
+# AWSアカウントIDを動的取得
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+BUCKET_NAME="glean-frontend-staging-${ACCOUNT_ID}"
 
 # ルートの .env（Firebase設定等）を読み込む
 ROOT_ENV_FILE="$ROOT_DIR/.env"

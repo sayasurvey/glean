@@ -3,6 +3,24 @@
 @tailwind utilities;
 
 :root {
+  /* brand palette */
+  --color-brand-25:  #f8fbf8;
+  --color-brand-50:  #f3f7f3;
+  --color-brand-100: #e8f0e8;
+  --color-brand-200: #d3e4d8;
+  --color-brand-300: #b6d3bf;
+  --color-brand-700: #2d5a3d;
+  --color-brand-800: #1f4a36;
+  --color-brand-900: #14332a;
+  /* ink */
+  --color-ink:   #16221a;
+  --color-ink-2: #455048;
+  --color-ink-3: #768279;
+  --color-ink-4: #a6b0a8;
+  /* rule */
+  --color-rule:   #e6ebe6;
+  --color-rule-2: #eef1ee;
+  /* shadow / transition */
   --shadow-card: 0 1px 0 rgba(20,40,30,.02), 0 4px 12px -4px rgba(20,40,30,.06);
   --shadow-hover: 0 4px 10px -2px rgba(20,40,30,.06), 0 8px 24px -6px rgba(20,40,30,.1);
   --t: 220ms cubic-bezier(.2,.6,.2,1);

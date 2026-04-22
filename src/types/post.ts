@@ -7,7 +7,7 @@ export interface Post {
   title: string
   description: string
   ogpImageUrl: string | null
-  tags: string[]
+  tags: readonly string[]
   createdAt: Timestamp
   updatedAt: Timestamp
 }

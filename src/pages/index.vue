@@ -5,8 +5,7 @@ definePageMeta({
 
 const { currentUser, logout } = useAuth()
 const { posts, isLoading, error, fetchPosts, deletePost, stopListening } = usePosts()
-const postsRef = posts as unknown as Ref<import('~/types/post').Post[]>
-const { keyword, filteredPosts: searchFiltered } = useSearch(postsRef)
+const { keyword, filteredPosts: searchFiltered } = useSearch(posts)
 
 const showRegistrationForm = ref(false)
 const sortOrder = ref('新着順')
@@ -29,7 +28,7 @@ const filteredPosts = computed(() => {
   if (sortOrder.value === 'タイトル順') {
     list = [...list].sort((a, b) => a.title.localeCompare(b.title, 'ja'))
   } else if (sortOrder.value === '古い順') {
-    list = [...list].slice().reverse()
+    list = [...list].sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis())
   }
   return list
 })
@@ -39,6 +38,20 @@ const totalPages = computed(() => Math.ceil(filteredPosts.value.length / PAGE_SI
 const paginatedPosts = computed(() => {
   const start = (currentPage.value - 1) * PAGE_SIZE
   return filteredPosts.value.slice(start, start + PAGE_SIZE)
+})
+
+const paginationPages = computed<(number | '...')[]>(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const pages: (number | '...')[] = [1]
+  if (current > 3) pages.push('...')
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+    pages.push(i)
+  }
+  if (current < total - 2) pages.push('...')
+  pages.push(total)
+  return pages
 })
 
 watch(filteredPosts, () => { currentPage.value = 1 })
@@ -167,8 +180,13 @@ const handleDeletePost = async (postId: string) => {
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <template v-for="page in totalPages" :key="page">
+        <template v-for="(page, i) in paginationPages" :key="i">
+          <span
+            v-if="page === '...'"
+            class="flex h-9 w-9 items-center justify-center text-[13px] text-ink-3"
+          >…</span>
           <button
+            v-else
             class="flex h-9 w-9 items-center justify-center rounded-lg border text-[13px] font-medium transition-all"
             :class="page === currentPage
               ? 'border-brand-700 bg-brand-700 text-white'

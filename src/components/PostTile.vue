@@ -105,7 +105,7 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
   display: flex;
   flex-direction: column;
   background: #fff;
-  border: 1px solid #e6ebe6;
+  border: 1px solid var(--color-rule);
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
@@ -115,18 +115,18 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
 }
 .card:hover {
   transform: translateY(-3px);
-  border-color: #b6d3bf;
-  box-shadow: var(--shadow-hover, 0 4px 10px -2px rgba(20,40,30,.06), 0 8px 24px -6px rgba(20,40,30,.1));
+  border-color: var(--color-brand-300);
+  box-shadow: var(--shadow-hover);
 }
 
 /* サムネイル */
 .thumb {
   aspect-ratio: 2/1;
   width: 100%;
-  background: #f3f7f3;
+  background: var(--color-brand-50);
   overflow: hidden;
   position: relative;
-  border-bottom: 1px solid #eef1ee;
+  border-bottom: 1px solid var(--color-rule-2);
 }
 .thumb-img {
   width: 100%; height: 100%;
@@ -142,7 +142,7 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
   align-items: flex-end;
   padding: 16px 18px;
   color: #fff;
-  background: linear-gradient(135deg, #2d5a3d, #14332a);
+  background: linear-gradient(135deg, var(--color-brand-700), var(--color-brand-900));
   position: relative;
 }
 .thumb-fallback::before {
@@ -191,14 +191,14 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
   border: none;
   background: rgba(255,255,255,.92);
   border-radius: 8px;
-  color: #455048;
+  color: var(--color-ink-2);
   display: grid; place-items: center;
   backdrop-filter: blur(4px);
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
   transition: all var(--t-fast, 140ms);
   cursor: pointer;
 }
-.a-btn:hover { background: #fff; color: #1f4a36; transform: scale(1.05); }
+.a-btn:hover { background: #fff; color: var(--color-brand-800); transform: scale(1.05); }
 .a-btn.danger:hover { color: #c0392b; }
 
 /* カードボディ */
@@ -213,7 +213,7 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
   font-size: 14.5px;
   font-weight: 700;
   line-height: 1.5;
-  color: #16221a;
+  color: var(--color-ink);
   letter-spacing: -0.005em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -223,20 +223,20 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
 .card-desc {
   font-size: 12.5px;
   line-height: 1.65;
-  color: #455048;
+  color: var(--color-ink-2);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .card-desc.empty {
-  color: #a6b0a8;
+  color: var(--color-ink-4);
   font-style: italic;
   font-size: 12px;
 }
 .card-divider {
   height: 1px;
-  background: #eef1ee;
+  background: var(--color-rule-2);
   margin: 4px -16px 0;
 }
 .card-meta {
@@ -244,20 +244,20 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
   align-items: center;
   gap: 8px;
   font-size: 11.5px;
-  color: #768279;
+  color: var(--color-ink-3);
 }
 .favicon {
   width: 14px; height: 14px;
   border-radius: 3px;
-  background: #e8f0e8;
+  background: var(--color-brand-100);
   display: inline-grid; place-items: center;
   font-family: 'Inter', sans-serif;
   font-size: 9px;
   font-weight: 700;
-  color: #2d5a3d;
+  color: var(--color-brand-700);
   flex-shrink: 0;
 }
-.domain { font-weight: 500; color: #455048; }
+.domain { font-weight: 500; color: var(--color-ink-2); }
 .card-tags {
   display: flex;
   flex-wrap: wrap;
@@ -269,13 +269,13 @@ const extraTagCount = computed(() => Math.max(0, props.post.tags.length - 3))
   font-weight: 500;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #f3f7f3;
-  color: #1f4a36;
-  border: 1px solid #e8f0e8;
+  background: var(--color-brand-50);
+  color: var(--color-brand-800);
+  border: 1px solid var(--color-brand-100);
   transition: all var(--t-fast, 140ms);
   cursor: pointer;
   line-height: 1.6;
 }
-.card-tag:hover { background: #e8f0e8; border-color: #b6d3bf; }
-.card-tag.more { background: transparent; color: #768279; border-color: #e6ebe6; }
+.card-tag:hover { background: var(--color-brand-100); border-color: var(--color-brand-300); }
+.card-tag.more { background: transparent; color: var(--color-ink-3); border-color: var(--color-rule); }
 </style>
